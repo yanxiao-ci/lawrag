@@ -1,0 +1,16 @@
+# IDE
+.idea
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 大模型权重（体积过大，不入库）
+/**/models
+/**/core/bert_results
+
+# 日志
+/**/*.log
+
+# 本地环境变量（含 API Key，禁止入库）
+.env

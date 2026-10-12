@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1880" height="1210" viewBox="0 0 1880 1210"><defs>
+  <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/></marker>
+  <marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/></marker>
+  <marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#16a34a"/></marker>
+  <marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/></marker>
+  <marker id="ahgray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#94a3b8"/></marker>
+  <marker id="ahB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/></marker>
+</defs><rect x="0" y="0" width="1880" height="1210" fill="#ffffff"/><text x="940.0" y="52" font-size="33" font-weight="bold" fill="#0f172a" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">在线问答 · 通道一：快问快答（MySQL + Redis + BM25）</text><text x="940.0" y="88" font-size="17" fill="#64748b" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">低成本、低延迟：先用缓存与 BM25 精确匹配，命中即直接返回；未命中再回退 RAG</text>
+<rect x="60.0" y="1040.0" width="74.0" height="34.0" rx="17.0" ry="17.0" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.6"/>
+<text x="97.0" y="1057.0" font-size="1" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif"></text>
+<text x="104.0" y="1057.0" font-size="15" font-weight="normal" fill="#475569" text-anchor="start" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" style="paint-order:stroke;stroke:#ffffff;stroke-width:5px;stroke-linejoin:round">起止</text>
+<rect x="162.0" y="1040.0" width="74.0" height="34.0" rx="9" ry="9" fill="#eef4ff" stroke="#3b6fd4" stroke-width="1.6"/>
+<text x="199.0" y="1057.0" font-size="1" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif"></text>
+<text x="206.0" y="1057.0" font-size="15" font-weight="normal" fill="#475569" text-anchor="start" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" style="paint-order:stroke;stroke:#ffffff;stroke-width:5px;stroke-linejoin:round">处理</text>
+<polygon points="301.0,1040.0 338.0,1057.0 301.0,1074.0 264.0,1057.0" fill="#fff8e1" stroke="#d99b00" stroke-width="1.6" stroke-linejoin="round"/>
+<text x="301.0" y="1057.0" font-size="1" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif"></text>
+<text x="308.0" y="1057.0" font-size="15" font-weight="normal" fill="#475569" text-anchor="start" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" style="paint-order:stroke;stroke:#ffffff;stroke-width:5px;stroke-linejoin:round">判断</text>
+<path d="M 366.0 1055.0 A 37.0 15.0 0 0 1 440.0 1055.0 L 440.0 1059.0 A 37.0 15.0 0 0 1 366.0 1059.0 Z" fill="#f3e8ff" stroke="#7c3aed" stroke-width="1.6"/>
+<ellipse cx="403.0" cy="1055.0" rx="37.0" ry="15.0" fill="none" stroke="#7c3aed" stroke-width="1.6"/>
+<text x="403.0" y="1065.2" font-size="1" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif"></text>
+<text x="410.0" y="1057.0" font-size="15" font-weight="normal" fill="#475569" text-anchor="start" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" style="paint-order:stroke;stroke:#ffffff;stroke-width:5px;stroke-linejoin:round">数据/存储</text>
+<rect x="60.0" y="1100.0" width="74.0" height="34.0" rx="9" ry="9" fill="#f1f5f9" stroke="#475569" stroke-width="1.6"/>
+<line x1="73.0" y1="1106.0" x2="73.0" y2="1128.0" stroke="#475569" stroke-width="1.6"/>
+<line x1="121.0" y1="1106.0" x2="121.0" y2="1128.0" stroke="#475569" stroke-width="1.6"/>
+<text x="97.0" y="1117.0" font-size="1" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif"></text>
+<text x="104.0" y="1117.0" font-size="15" font-weight="normal" fill="#475569" text-anchor="start" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" style="paint-order:stroke;stroke:#ffffff;stroke-width:5px;stroke-linejoin:round">子流程</text>
+<rect x="177.0" y="1100.0" width="74.0" height="34.0" rx="8" ry="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="7 5"/>
+<text x="214.0" y="1117.0" font-size="1" font-weight="normal" fill="#475569" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif"></text>
+<text x="221.0" y="1117.0" font-size="15" font-weight="normal" fill="#475569" text-anchor="start" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" style="paint-order:stroke;stroke:#ffffff;stroke-width:5px;stroke-linejoin:round">说明</text>
+<path d="M 450.0 250.0 L 530.0 250.0" fill="none" stroke="#334155" stroke-width="2.2" stroke-linejoin="round" marker-end="url(##334155)"/>
+<path d="M 900.0 250.0 L 980.0 250.0" fill="none" stroke="#334155" stroke-width="2.2" stroke-linejoin="round" marker-end="url(##334155)"/>
+<path d="M 1350.0 250.0 L 1430.0 250.0" fill="none" stroke="#334155" stroke-width="2.2" stroke-linejoin="round" marker-end="url(##334155)"/>
+<text x="1390.0" y="228.0" font-size="16" font-weight="bold" fill="#16a34a" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" style="paint-order:stroke;stroke:#ffffff;stroke-width:5px;stroke-linejoin:round">是</text>
+<path d="M 980.0 315.0 L 980.0 350.0 L 265.0 350.0 L 265.0 422.0" fill="none" stroke="#334155" stroke-width="2.2" stroke-linejoin="round" marker-end="url(##334155)"/>
+<text x="940.0" y="330.0" font-size="16" font-weight="bold" fill="#dc2626" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" style="paint-order:stroke;stroke:#ffffff;stroke-width:5px;stroke-linejoin:round">否</text>
+<path d="M 450.0 470.0 L 530.0 470.0" fill="none" stroke="#334155" stroke-width="2.2" stroke-linejoin="round" marker-end="url(##334155)"/>
+<path d="M 900.0 470.0 L 980.0 470.0" fill="none" stroke="#334155" stroke-width="2.2" stroke-linejoin="round" marker-end="url(##334155)"/>
+<text x="940.0" y="448.0" font-size="16" font-weight="bold" fill="#16a34a" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" style="paint-order:stroke;stroke:#ffffff;stroke-width:5px;stroke-linejoin:round">是</text>
+<path d="M 715.0 535.0 L 715.0 610.0 L 265.0 610.0 L 265.0 642.0" fill="none" stroke="#334155" stroke-width="2.2" stroke-linejoin="round" marker-end="url(##334155)"/>
+<text x="749.0" y="592.0" font-size="16" font-weight="bold" fill="#dc2626" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" style="paint-order:stroke;stroke:#ffffff;stroke-width:5px;stroke-linejoin:round">否</text>
+<path d="M 450.0 690.0 L 530.0 690.0" fill="none" stroke="#334155" stroke-width="2.2" stroke-linejoin="round" marker-end="url(##334155)"/>
+<path d="M 900.0 690.0 L 980.0 690.0" fill="none" stroke="#334155" stroke-width="2.2" stroke-linejoin="round" marker-end="url(##334155)"/>
+<path d="M 1350.0 690.0 L 1430.0 690.0" fill="none" stroke="#334155" stroke-width="2.2" stroke-linejoin="round" marker-end="url(##334155)"/>
+<text x="1390.0" y="668.0" font-size="16" font-weight="bold" fill="#16a34a" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" style="paint-order:stroke;stroke:#ffffff;stroke-width:5px;stroke-linejoin:round">是</text>
+<path d="M 1165.0 755.0 L 1165.0 862.0" fill="none" stroke="#334155" stroke-width="2.2" stroke-linejoin="round" marker-end="url(##334155)"/>
+<text x="1199.0" y="828.0" font-size="16" font-weight="bold" fill="#dc2626" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" style="paint-order:stroke;stroke:#ffffff;stroke-width:5px;stroke-linejoin:round">否</text>
+<path d="M 1615.0 738.0 L 1615.0 862.0" fill="none" stroke="#334155" stroke-width="2.2" stroke-linejoin="round" marker-end="url(##334155)"/>
+<text x="1645.0" y="850.0" font-size="16" font-weight="bold" fill="#16a34a" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif" style="paint-order:stroke;stroke:#ffffff;stroke-width:5px;stroke-linejoin:round">是</text>
+<rect x="80.0" y="202.0" width="370.0" height="96.0" rx="48.0" ry="48.0" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2.0"/>
+<text x="265.0" y="239.4" font-size="16" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">用户提问</text>
+<text x="265.0" y="260.6" font-size="16" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">(前端页面)</text>
+<rect x="530.0" y="202.0" width="370.0" height="96.0" rx="9" ry="9" fill="#eef4ff" stroke="#3b6fd4" stroke-width="2.0"/>
+<text x="715.0" y="240.1" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">FastAPI 统一入口</text>
+<text x="715.0" y="259.9" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">POST /api/query · WS /api/stream</text>
+<polygon points="1165.0,185.0 1350.0,250.0 1165.0,315.0 980.0,250.0" fill="#fff8e1" stroke="#d99b00" stroke-width="2.0" stroke-linejoin="round"/>
+<text x="1165.0" y="240.1" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">命中日常问候语？</text>
+<text x="1165.0" y="259.9" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">（正则匹配 4 类模板）</text>
+<rect x="1430.0" y="202.0" width="370.0" height="96.0" rx="48.0" ry="48.0" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2.0"/>
+<text x="1615.0" y="240.1" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">直接返回模板回复</text>
+<text x="1615.0" y="259.9" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">（黑马程序员人设）</text>
+<path d="M 80.0 437.0 A 185.0 15.0 0 0 1 450.0 437.0 L 450.0 503.0 A 185.0 15.0 0 0 1 80.0 503.0 Z" fill="#f3e8ff" stroke="#7c3aed" stroke-width="2.0"/>
+<ellipse cx="265.0" cy="437.0" rx="185.0" ry="15.0" fill="none" stroke="#7c3aed" stroke-width="2.0"/>
+<text x="265.0" y="468.4" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">读取会话历史</text>
+<text x="265.0" y="488.2" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">MySQL conversations 表（最近 5 轮）</text>
+<polygon points="715.0,405.0 900.0,470.0 715.0,535.0 530.0,470.0" fill="#fff8e1" stroke="#d99b00" stroke-width="2.0" stroke-linejoin="round"/>
+<text x="715.0" y="460.1" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">Redis 缓存命中？</text>
+<text x="715.0" y="479.9" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">key = answer:{原始问题}</text>
+<rect x="980.0" y="422.0" width="370.0" height="96.0" rx="48.0" ry="48.0" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2.0"/>
+<text x="1165.0" y="460.1" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">直接返回缓存答案</text>
+<text x="1165.0" y="479.9" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">（无需检索）</text>
+<rect x="80.0" y="642.0" width="370.0" height="96.0" rx="9" ry="9" fill="#eef4ff" stroke="#3b6fd4" stroke-width="2.0"/>
+<text x="265.0" y="680.1" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">Jieba 分词</text>
+<text x="265.0" y="699.9" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">文本统一转小写 preprocess_text()</text>
+<rect x="530.0" y="642.0" width="370.0" height="96.0" rx="9" ry="9" fill="#eef4ff" stroke="#3b6fd4" stroke-width="2.0"/>
+<text x="715.0" y="680.1" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">BM25Okapi 打分 → Softmax 归一化</text>
+<text x="715.0" y="699.9" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">→ 取最高分 best_score</text>
+<polygon points="1165.0,625.0 1350.0,690.0 1165.0,755.0 980.0,690.0" fill="#fff8e1" stroke="#d99b00" stroke-width="2.0" stroke-linejoin="round"/>
+<text x="1165.0" y="690.0" font-size="16" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">best_score &gt; 阈值 0.85 ？</text>
+<rect x="1430.0" y="642.0" width="370.0" height="96.0" rx="9" ry="9" fill="#eef4ff" stroke="#3b6fd4" stroke-width="2.0"/>
+<text x="1615.0" y="680.1" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">MySQL 表 jpkb 按原问题取答案</text>
+<text x="1615.0" y="699.9" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">并写 Redis 缓存</text>
+<rect x="80.0" y="862.0" width="370.0" height="96.0" rx="8" ry="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="7 5"/>
+<text x="265.0" y="900.8" font-size="14" font-weight="normal" fill="#475569" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">阈值 0.85 可配置</text>
+<text x="265.0" y="919.2" font-size="14" font-weight="normal" fill="#475569" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">search(query, threshold=0.85)</text>
+<rect x="530.0" y="862.0" width="370.0" height="96.0" rx="8" ry="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="7 5"/>
+<text x="715.0" y="900.8" font-size="14" font-weight="normal" fill="#475569" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">命中判定用的是 Softmax 归一化后的分数</text>
+<text x="715.0" y="919.2" font-size="14" font-weight="normal" fill="#475569" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">不是原始 BM25 分值</text>
+<rect x="980.0" y="862.0" width="370.0" height="96.0" rx="9" ry="9" fill="#f1f5f9" stroke="#475569" stroke-width="2.0"/>
+<text x="1165.0" y="900.1" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">回退 RAG 通道</text>
+<text x="1165.0" y="919.9" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">（详见 图 4）</text>
+<rect x="1430.0" y="862.0" width="370.0" height="96.0" rx="48.0" ry="48.0" fill="#e8f5e9" stroke="#2e7d32" stroke-width="2.0"/>
+<text x="1615.0" y="900.1" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">返回标准答案</text>
+<text x="1615.0" y="919.9" font-size="15" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">并写入会话历史</text></svg>
