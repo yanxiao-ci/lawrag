@@ -4,7 +4,7 @@
 > 不是理想化设计。图源文件在 `docs/figures/`，重新生成：
 >
 > ```
-> D:\software\Anaconda\envs\edu_rag\python.exe docs\make_flowchart.py
+> python docs\make_flowchart.py
 > ```
 >
 > 脚本只用标准库，输出 `docs/figures/{overview,indexing,faq,rag}.svg`；
@@ -246,4 +246,4 @@ flowchart TD
 | 存储（Redis / MySQL / Milvus）与处理步骤混用同一种方框 | 存储统一用圆柱，处理用矩形 |
 | 一个图里挤了 30 多个节点，无法看清层级 | 拆成 1 张总览 + 3 张详细图，总览用子流程框引用 |
 | 缺少起止节点和闭环（评估、调参） | 补起止节点，补「四类评测 → 调参 → 回归」闭环 |
-| 教育版的三段丢失了法律版新增的环节 | 补上条文号精确路由、词面门控、第三召回源（问答块）三个新增节点 |
+| 旧版示意图缺少法律版新增的环节 | 补上条文号精确路由、词面门控、第三召回源（问答块）三个新增节点 |

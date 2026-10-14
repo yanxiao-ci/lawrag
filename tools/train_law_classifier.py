@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-用法律二分类数据训练查询分类器（《法律方向改造方案书》§4 第 7 行 / §6.2）
+用法律二分类数据训练查询分类器（《项目方案书》§4 第 7 行 / §6.2）
 数据: rag_qa/classify_data/model_law_5000.json  (2500 通用知识 + 2500 法律咨询)
 产物: rag_qa/models/bert_query_classifier_law
 用法: python tools/train_law_classifier.py

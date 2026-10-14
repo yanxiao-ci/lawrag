@@ -2,7 +2,7 @@
 """
 法律数据入库脚本
 ================
-把 rag_qa/data/law_data 的结构化结果写进 MySQL（《法律方向改造方案书》§7 步骤 1、§4.1）：
+把 rag_qa/data/law_data 的结构化结果写进 MySQL（《项目方案书》§7 步骤 1、§4.1）：
   1) law_articles 表  <- law_data 解析出的全部法条（P0 扩容后：287 部法律 / 21255 条法条）
   2) law_faq 表          <- mysql_qa/data/law_qa.csv（由 tools/sample_law_faq.py 生成的 2 万条法律 FAQ）
 
@@ -12,7 +12,7 @@
   python tools/import_law_data.py --qa-only  # 只重建 law_faq
 
 注意:
-  - 重建 law_faq 会先清空该表；原始 IT 问答数据已归档在 _archive/edu_version/JP学科知识问答.csv，可回滚。
+  - 重建 law_faq 会先清空该表；历史问答数据已归档在 `_archive/`，需要回滚时从那里取。
   - law_qa.csv 由 tools/sample_law_faq.py 生成（领域均衡 + 引用可核对），本脚本只负责入库。
 """
 

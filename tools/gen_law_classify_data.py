@@ -4,7 +4,7 @@
 法律领域二分类训练数据生成器
 ============================
 为改造后的查询分类器（QueryClassifier）生成「通用知识 / 法律咨询」二分类训练集，
-沿用原 EduRAG「均衡生成」的做法（提示词见 rag_qa/classify_data/提示词模块_法律.txt）。
+沿用「均衡生成」的做法（提示词见 rag_qa/classify_data/提示词模块_法律.txt）。
 
 产物:
   rag_qa/classify_data/model_law_5000.json —— JSONL，一行一条 {"query": "...", "label": "..."}

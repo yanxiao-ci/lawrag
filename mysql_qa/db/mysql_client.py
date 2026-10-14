@@ -65,7 +65,7 @@ class MySQLClient:
             self.connection.rollback()
             raise
 
-    # 创建法条表（法律方向改造方案书 §4.1）
+    # 创建法条表（项目方案书 §4.1）
     def create_law_articles_table(self):
         create_table_query = '''
             CREATE TABLE IF NOT EXISTS law_articles (
