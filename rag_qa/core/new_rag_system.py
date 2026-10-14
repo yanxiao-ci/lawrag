@@ -5,6 +5,13 @@ from base.config import config
 from base.logger import logger
 from rag_qa.core.query_classifier import QueryClassifier  # 导入查询分类器
 from rag_qa.core.strategy_selector import StrategySelector  # 导入策略选择器
+from rag_qa.core.citation_check import validate_citations  # 引用可验证（小改动 C）
+
+# P2：第三召回源（jpkb 法律问答）的两个参数
+#   召回候选数：先粗取几条，用精排模型排序
+#   注入条数：最终最多补充几条问答进上下文（法条那条链路仍然是 CANDIDATE_M 条，不受影响）
+FAQ_RETRIEVAL_K = 3
+FAQ_INJECT_N = 2
 
 #   定义 RAGSystem 类，封装 RAG 系统的核心逻辑
 class RAGSystem:
@@ -16,9 +23,11 @@ class RAGSystem:
         self.llm = llm
         #   获取 RAG 提示模板
         self.rag_prompt = RAGPrompts.rag_prompt()
+        #   通用知识提示模板（与法条无关）
+        self.general_prompt = RAGPrompts.general_prompt()
         #   初始化查询分类器
         self.query_classifier = QueryClassifier(
-            model_path=f'{config.MODELS_DIR}/bert_query_classifier1')
+            model_path=f'{config.MODELS_DIR}/bert_query_classifier_law')
         #   初始化策略选择器
         self.strategy_selector = StrategySelector()
         # 最大 4096 字符
@@ -136,6 +145,21 @@ class RAGSystem:
         #     final_context_docs = ranked_sub_chunks[:config.CANDIDATE_M]
 
         final_context_docs = ranked_sub_chunks[:config.CANDIDATE_M]
+
+        # P2：第三召回源——jpkb 的 2 万条法律问答。
+        # 法条检索漏掉的条文，问答对常常能补上：实测条文覆盖率 62.5% → 81.9%。
+        # 问答走单独一路召回，用同一个精排模型排序，最多补充 FAQ_INJECT_N 条；
+        # 失败只记日志，不影响法条链路。
+        try:
+            faq_docs = self.vector_store.search_faq(query, k=FAQ_RETRIEVAL_K)
+            if faq_docs:
+                scores = self.vector_store.reranker.predict([[query, d.page_content] for d in faq_docs])
+                faq_docs = [d for _, d in sorted(zip(scores, faq_docs), reverse=True)][:FAQ_INJECT_N]
+                logger.info(f"FAQ 召回 {len(faq_docs)} 条问答作为补充上下文")
+                final_context_docs = final_context_docs + faq_docs
+        except Exception as e:
+            logger.error(f"FAQ 召回失败（不影响法条链路）: {e}")
+
         logger.info(f"最终选取 {len(final_context_docs)} 个文档作为上下文")
         return final_context_docs
 
@@ -171,14 +195,13 @@ class RAGSystem:
         logger.info(f"查询分类结果: {query_category} (查询: '{query}')")
 
         # 准备上下文
+        context = ""
         try:
             if query_category == "通用知识":
                 logger.info("查询为通用知识，直接调用 LLM")
-                prompt_input = self.rag_prompt.format(
-                    context="",
+                prompt_input = self.general_prompt.format(
                     history=history_context,
                     question=query,
-                    phone=config.CUSTOMER_SERVICE_PHONE
                 )
             else:
                 logger.info("查询为专业咨询，执行 RAG 流程")
@@ -187,7 +210,7 @@ class RAGSystem:
                 context_docs = self.retrieve_and_merge(
                     query, source_filter=source_filter, strategy=strategy
                 )
-                context = "\n\n".join([doc.page_content for doc in context_docs]) if context_docs else ""
+                context = "\n\n".join([self._format_context_doc(doc) for doc in context_docs]) if context_docs else ""
                 logger.info(f"构建上下文完成，包含 {len(context_docs)} 个文档块")
 
                 # 构造提示
@@ -211,10 +234,18 @@ class RAGSystem:
 
             # 调用 LLM（流式输出）
             try:
-                print("333--->prompt_input")
-                # 使用 generator 获取流式输出
+                # 使用 generator 获取流式输出，同时累积完整答案用于引用校验
+                collected_answer = ""
                 for token in self.llm(prompt_input):
+                    collected_answer += token
                     yield token  # 直接将每个 token 传递给调用者
+
+                # 引用可验证（小改动 C）：回答里的《X》第Y条必须能在本轮上下文里找到
+                missing = validate_citations(collected_answer, context)
+                if missing:
+                    names = "、".join(f"《{law}》第{num}条" for law, num in missing)
+                    logger.warning(f"引用校验未通过: {names}")
+                    yield f"\n\n（校验提示：回答中引用的 {names} 未能在本轮检索到的条文中找到依据，请谨慎采信或补充条文号。）"
 
                 # 记录处理时间
                 processing_time = time.time() - start_time
@@ -226,6 +257,26 @@ class RAGSystem:
         except Exception as e:
             logger.error(f"答案生成失败: {e}")
             yield f"抱歉，处理您的问题时出错。请联系人工客服：{config.CUSTOMER_SERVICE_PHONE}"
+
+    @staticmethod
+    def _format_context_doc(doc):
+        """P1：给上下文块加上「命中条文 + 编/章/节 + 时效状态」抬头。
+        目的：让模型引用时能带出章节与时效说明，而不是只给一个条文号。
+        """
+        md = doc.metadata or {}
+        # P2：第三召回源（jpkb 问答）的抬头
+        if md.get("source") == "faq" and md.get("question"):
+            return f"【命中问答】{md['question']}\n{md.get('answer', doc.page_content)}"
+        body = md.get("parent_content") or doc.page_content
+        if not md.get("law_name"):
+            return body
+        tags = [f"《{md['law_name']}》{md.get('article_no', '')}".strip()]
+        if md.get("chapter"):
+            tags.append(md["chapter"])
+        if md.get("status"):
+            tags.append(md["status"])
+        return f"【命中条文】{' · '.join(tags)}\n{body}"
+
 
 # query 意图识别 使用bert 分类
 # 对 改进：

@@ -9,6 +9,16 @@ __pycache__/
 /**/models
 /**/core/bert_results
 
+# 法律方向大体积数据（评测集/层级语料，体积过大不入库；主语料 law_data 正常入库）
+/rag_qa/data/law_eval/
+/rag_qa/data/law_chapter/
+
+# 全量法规原始数据（152MB，扩容脚本的数据源，不入库）
+/_law_src/
+
+# 语料扩容时自动生成的旧语料备份（不入库）
+/rag_qa/data/_backup_law_data_*/
+
 # 日志
 /**/*.log
 

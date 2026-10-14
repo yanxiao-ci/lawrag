@@ -20,7 +20,7 @@ from base.config import config
 from new_main import IntegratedQASystem
 
 # 创建应用实例
-app = FastAPI(title="问答系统API", description="集成MySQL和RAG的智能问答系统")
+app = FastAPI(title="法律法规智能问答API", description="法律法规智能问答助手（法条检索 + 法律问答 + RAG）")
 
 # 配置CORS，允许前端访问
 app.add_middleware(
@@ -37,23 +37,23 @@ os.makedirs("static", exist_ok=True)
 # 创建全局QA系统实例
 qa_system = IntegratedQASystem()
 
-# 定义日常问候用语模式和回复
+# 定义日常问候用语模式和回复（法律问答场景）
 GREETING_PATTERNS = [
     {
         "pattern": r"^(你好|您好|hi|Hi|hello|Hello)",
-        "response": "你好！我是黑马程序员，专注于为学生答疑解惑，很高兴为你服务！"
+        "response": "你好！我是法律法规智能问答助手，可以帮你查法条、答法律问题，很高兴为你服务。"
     },
     {
-        "pattern": r"^(你是谁|您是谁|你叫什么|你的名字|who are you)",
-        "response": "我是黑马程序员，你的智能学习助手，致力于提供 IT 教育相关的解答！"
+        "pattern": r"^(你是谁|您是谁|你叫什么|你的名字|who are you|你能做什么|你会什么)",
+        "response": "我是法律法规智能问答助手，基于 97 部法律（8544 条法条）作答。你可以直接问「《民法典》第一千零六十二条讲什么」，也可以问「买到假货怎么赔」这类实际问题，回答会标注《法律名》第 X 条。"
     },
     {
         "pattern": r"^(在吗|在不在|有人吗|在不)",
-        "response": "我在！我是黑马程序员，随时为你解答问题！"
+        "response": "我在！我是法律法规智能问答助手，随时为你解答法律问题。"
     },
     {
         "pattern": r"^(干嘛呢|你在干嘛|做什么)",
-        "response": "我正在待命，随时为你解答 IT 学习相关的问题！有什么我可以帮你的？"
+        "response": "我正在待命，随时为你解答法律法规相关的问题。有什么我可以帮你的？"
     }
 ]
 
@@ -139,7 +139,6 @@ def check_greeting(query: str) -> Optional[str]:
 # 非流式查询接口
 @app.post("/api/query")
 async def query(request: QueryRequest):
-    print("222222222222222222")
     start_time = time.time()
     session_id = request.session_id or str(uuid.uuid4())
 
@@ -155,7 +154,6 @@ async def query(request: QueryRequest):
 
     # 判断是否需要流式处理（基于 need_rag）
     query_result = qa_system.query(request.query, request.source_filter, session_id)
-    print(f"111--->query:{request.query}, source_filter:{request.source_filter}")
     
     first_chunk = next(query_result, None)
     if first_chunk is None:
@@ -291,4 +289,8 @@ async def get_sources():
 if __name__ == "__main__":
     import uvicorn
 
+    # host=0.0.0.0 表示"监听本机所有网卡"，它不是可访问的网址；
+    # 浏览器请用 http://127.0.0.1:8080/ 或 http://localhost:8080/
+    print("\n[提示] 服务启动后，请在浏览器打开: http://127.0.0.1:8080/")
+    print("[提示] 不要用 http://0.0.0.0:8080/ —— 0.0.0.0 是监听地址，不是可访问地址\n")
     uvicorn.run(app=app, host="0.0.0.0", port=8080, reload=False)

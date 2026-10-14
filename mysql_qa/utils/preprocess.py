@@ -16,7 +16,6 @@ from base.logger import logger
 
 def preprocess_text(text):
     # 预处理文本
-    logger.info(f"开始预处理文本-->{text}")
     try:
         # 转小写后再分词
         return jieba.lcut(text.lower())

@@ -50,8 +50,8 @@ class QueryClassifier:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.mps.is_available() else "cpu" )
         # 记录设备信息
         logger.info(f"使用设备: {self.device}")
-        # 定义标签映射
-        self.label_map = {"通用知识": 0, "专业咨询": 1}
+        # 定义标签映射（法律方向二分类：通用知识 / 法律咨询）
+        self.label_map = {"通用知识": 0, "法律咨询": 1}
         # 加载模型
         self.load_model()
 
@@ -243,7 +243,7 @@ class QueryClassifier:
         logger.info(classification_report(
             true_labels,
             pred_labels,
-            target_names=["通用知识", "专业咨询"]
+            target_names=list(self.label_map.keys())
         ))
         logger.info("混淆矩阵:")
         logger.info(confusion_matrix(true_labels, pred_labels))
@@ -266,7 +266,7 @@ class QueryClassifier:
             # 获取预测结果
             prediction = torch.argmax(outputs.logits, dim=1).item()
         # 根据预测结果返回类别
-        return "专业咨询" if prediction == 1 else "通用知识"
+        return "法律咨询" if prediction == 1 else "通用知识"
 
 
 # 测试

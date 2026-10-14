@@ -9,6 +9,11 @@ from base.logger import logger
 
 
 class RedisClient:
+    # 答案缓存的过期时间（秒）：7 天。
+    # P1 收尾：原来 set 不带过期，命中的答案（含被 BM25 误命中的错误答案）会永久留在 Redis 里，
+    # 法条更新后也会一直命中旧答案。7 天是个保守值，要调就改这一行（或以后挪进 config.ini）。
+    ANSWER_TTL = 7 * 24 * 3600
+
     def __init__(self):
         try:
             # 连接 Redis
@@ -26,11 +31,12 @@ class RedisClient:
             logger.error(f"Redis 连接失败: {e}")
             raise
 
-    def set_data(self, key, value):
-        # 存储数据到 Redis
+    def set_data(self, key, value, expire=ANSWER_TTL):
+        # 存储数据到 Redis（expire 单位秒；传 None 表示永不过期）
         try:
             # 存储 JSON 数据    key:value   key是string， value是json串
-            self.client.set(key, json.dumps(value,ensure_ascii=False)) #ensure_ascii=False加上中文就能正常显示
+            # ensure_ascii=False 加上中文就能正常显示
+            self.client.set(key, json.dumps(value, ensure_ascii=False), ex=expire)
             # 记录存储成功
             logger.info(f"存储数据到 Redis: {key}")
         except redis.RedisError as e:

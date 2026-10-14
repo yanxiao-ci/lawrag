@@ -5,6 +5,12 @@
 import configparser
 # 导入路径操作库
 import os
+# 导入 .env 加载器（本地开发用；.env 已 gitignore，用于存放 API Key 等敏感配置）
+from dotenv import load_dotenv
+
+# 加载项目根目录下的 .env；文件不存在时静默跳过
+# 注意：要在读取 os.getenv 之前执行，且 .env 的值会覆盖 config.ini
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
 
 
 class Config:
@@ -66,7 +72,7 @@ class Config:
         # LLM 配置
         # LLM 模型名
         # self.LLM_MODEL = os.getenv('LLM_MODEL', self.config.get('llm', 'model', fallback='qwen3.7-max-preview'))
-        self.LLM_MODEL = os.getenv('LLM_MODEL', self.config.get('llm', 'model', fallback='qwen3.8-27b'))
+        self.LLM_MODEL = os.getenv('LLM_MODEL', self.config.get('llm', 'model', fallback='qwen3.8-flash'))
         # DashScope API 密钥
         self.DASHSCOPE_API_KEY = os.getenv('DASHSCOPE_API_KEY',
                                            self.config.get('llm', 'dashscope_api_key',

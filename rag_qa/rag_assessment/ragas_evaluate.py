@@ -1,10 +1,21 @@
 """
     百炼千问模型
 """
+# 导入 argparse，用于指定评测数据文件（默认仍然是教育版小集）
+import argparse
+# 导入 os，用于把相对路径解析成相对脚本所在目录
+import os
+# 导入 sys，把项目根目录放进模块搜索路径（否则命令行直接跑找不到 base/rag_qa 包）
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 # 导入pandas库，用于数据处理和保存CSV文件
 import pandas as pd
 # 导入ragas库的evaluate函数，用于执行RAG评估
 from ragas import evaluate
+# 导入 RunConfig：控制评测并发与超时。
+# 免费额度下默认 16 并发会大量超时（实测 2026-10-14：qwen3.8-flash 那轮 50 条里
+# 后半段整片 TimeoutError、判分变 nan），所以并发数做成了命令行参数。
+from ragas import RunConfig
 # 导入ragas的评估指标，包括忠实度、答案相关性、上下文相关性和上下文召回率
 from ragas.metrics import (
     faithfulness,  # 忠实度
@@ -21,11 +32,34 @@ from langchain_community.embeddings import DashScopeEmbeddings
 import json
 from base.config import config
 
+# 脚本目录：默认数据/结果路径都相对这里，换工作目录也能跑
+DIR = os.path.dirname(os.path.abspath(__file__))
+
+parser = argparse.ArgumentParser(description="RAGAS 评测（支持换数据集）")
+parser.add_argument("--data", default=os.path.join(DIR, "rag_evaluate_data_small.json"),
+                    help="评测数据：JSON 列表，每条含 question/context/answer/ground_truth")
+parser.add_argument("--out", default=os.path.join(DIR, "ragas_evaluation_results.csv"),
+                    help="结果 CSV 输出路径")
+parser.add_argument("--limit", type=int, default=0, help="只评测前 N 条（调试用，0=全部）")
+parser.add_argument("--start", type=int, default=0, help="从第几条开始（分批跑用）")
+# 评评测并发与超时：judge 模型额度紧张/响应慢时，把 --workers 调小
+parser.add_argument("--workers", type=int, default=4, help="评测并发数（默认 4，免费额度下别调太高）")
+parser.add_argument("--timeout", type=int, default=240, help="单次调用超时秒数（默认 240）")
+args = parser.parse_args()
+print(f"评测数据：{args.data}")
+
 # 1. 加载生成的数据集
 # 使用with语句打开JSON文件，确保文件正确关闭，指定编码为utf-8
-with open("rag_evaluate_data_small.json", "r", encoding="utf-8") as f:
+with open(args.data, "r", encoding="utf-8") as f:
     # 将JSON文件内容加载到data变量中，data为包含多个数据条目的列表
     data = json.load(f)
+if args.limit or args.start:
+    data = data[args.start:(args.start + args.limit) if args.limit else None]
+
+
+def ctx_of(item):
+    """兼容两种字段名：老数据用 context，新收集的用 contexts。"""
+    return item.get("context") or item.get("contexts") or []
 
 # 2. 转换为RAGAS格式
 # 创建字典eval_data，将JSON数据转换为RAGAS要求的字段格式
@@ -35,7 +69,7 @@ eval_data = {
     # 提取每个数据条目的answer字段，组成答案列表
     "answer": [item["answer"] for item in data],
     # 提取每个数据条目的context字段，组成上下文列表（每个context为列表）
-    "contexts": [item["context"] for item in data],
+    "contexts": [ctx_of(item) for item in data],
     # 提取每个数据条目的ground_truth字段，组成真实答案列表
     "ground_truth": [item["ground_truth"] for item in data]
 }
@@ -69,7 +103,9 @@ result = evaluate(
     # 传入配置好的LLM模型
     llm=llm,
     # 传入配置好的嵌入模型
-    embeddings=embeddings
+    embeddings=embeddings,
+    # 并发与超时（命令行可调，避免额度紧张时整片超时把分数打成 nan）
+    run_config=RunConfig(max_workers=args.workers, timeout=args.timeout)
 )
 
 # 5. 输出并保存结果
@@ -80,4 +116,14 @@ print(result)
 # 将评估结果转换为pandas DataFrame，便于保存
 result_df = pd.DataFrame([result])
 # 将DataFrame保存为CSV文件，文件名为ragas_evaluation_results.csv，不保存索引
-result_df.to_csv("ragas_evaluation_results.csv", index=False)
+result_df.to_csv(args.out, index=False)
+print(f"结果已写入：{args.out}")
+
+# 逐条明细（便于复核低分是哪几条、为什么低）：<结果名>_detail.csv
+try:
+    detail = result.to_pandas()
+    detail_path = args.out.replace(".csv", "") + "_detail.csv"
+    detail.to_csv(detail_path, index=False)
+    print(f"逐条明细已写入：{detail_path}")
+except Exception as e:
+    print(f"逐条明细导出失败（不影响上面的总分）：{e}")

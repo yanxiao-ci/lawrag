@@ -9,6 +9,7 @@ from mysql_qa.retrieval.bm25_search import BM25Search
 from rag_qa.core.vector_store import VectorStore
 from rag_qa.core.new_rag_system import RAGSystem
 # 导入配置和日志
+from base.law_parser import extract_citation
 from base.logger import logger
 from base.config import config
 # 导入OpenAI客户端，用于DashScope API
@@ -89,7 +90,15 @@ class IntegratedQASystem:
             return collected_content
         except Exception as e:
             logger.error(f"call_dashscope LLM调用失败: {e}")
-            return f"call_dashscope 错误：LLM调用失败 - {e}"
+            # 注意：本函数是生成器，出错时**不能** `return "错误信息"`——
+            # 生成器里 return 的值会被丢弃（只留在 StopIteration.value 里），
+            # 上层"".join(...) 拿到的是空字符串，于是前端显示【空白回答】。
+            # 2026-10-14 模型免费额度耗尽时就是这样被藏住 74 次失败的。
+            # 改成 yield 出来，让错误对用户和日志都可见。
+            reason = str(e).splitlines()[0][:160] if str(e) else type(e).__name__
+            yield (f"（模型调用失败：{reason}）\n"
+                   f"抱歉，暂时无法生成回答，请稍后重试；若持续失败请检查模型额度配置，"
+                   f"或联系人工客服：{config.CUSTOMER_SERVICE_PHONE}")
 
     # 从MySQL中获取最近的5轮会话历史
     def _fetch_recent_history(self, session_id: str) -> list:
@@ -162,6 +171,43 @@ class IntegratedQASystem:
             self.mysql_client.connection.rollback()
             return False
 
+    # 小改动 B：条文号精确路由的辅助方法
+    def _answer_by_citation(self, query):
+        """小改动 B：条文号精确路由。
+        查询里出现《X法》第Y条 这类精确引用时，直接走 MySQL 精确查询；
+        确定性检索优先于语义检索——精确引用不该交给向量库去"猜"。
+        P1：返回时带上 编/章/节 与施行日期，并提示是否另有历史版本。
+        命中返回条文串，未命中（或没有引用）返回 None。
+        """
+        citation = extract_citation(query)
+        if not citation:
+            return None
+        law_name, article_no, _num = citation
+        detail = self.mysql_client.find_law_article_detail(law_name, article_no)
+        if not detail:
+            logger.info(f"条文号精确路由未命中: {law_name} {article_no}")
+            return None
+        logger.info(f"条文号精确命中: {detail['law_name']} {article_no} "
+                    f"(章节: {detail.get('chapter') or '无'}, 状态: {detail.get('status')})")
+        # 组装出处信息：编/章/节 + 施行日期（只有现行有效版本才标施行日）
+        tags = []
+        if detail.get("chapter"):
+            tags.append(detail["chapter"])
+        if detail.get("status") == "有效" and detail.get("effective_date"):
+            tags.append(f"{detail['effective_date']} 施行")
+        if detail.get("status") and detail["status"] != "有效":
+            tags.append(f"版本状态：{detail['status']}")
+        where = f"（{' · '.join(tags)}）" if tags else ""
+        answer = f"《{detail['law_name']}》{article_no}{where}：{detail['article_text']}"
+        # 时效提示：库里同时保留了历史版本，回答里明确说明引的是现行有效版本
+        versions = self.mysql_client.list_law_versions(detail["law_name"])
+        if versions:
+            v = versions[0]
+            answer += (f"\n\n（时效提示：以上引用的《{detail['law_name']}》为现行有效版本；"
+                       f"知识库另存有 {str(v[2])[:4]} 年的旧版本，已标记为「{v[1]}」，"
+                       f"如需新旧条文对照可以说一声。）")
+        return answer
+
     # 问答查询
     def query(self, query, source_filter=None, session_id=None):
         """查询集成系统，支持对话历史和流式输出"""
@@ -172,8 +218,13 @@ class IntegratedQASystem:
         #上下文token有限,所以限制五轮
         history = self.get_session_history(session_id) if session_id else []
 
-        # 首先尝试MySQL精确查询
-        answer, need_rag = self.bm25_search.search(query, threshold=0.85)
+        # 小改动 B：先试条文号精确路由（《X》第Y条 直接查 MySQL）
+        answer = self._answer_by_citation(query)
+        if answer is not None:
+            need_rag = False
+        else:
+            # 其次尝试MySQL(BM25 法条正文 + 法律问答)精确查询
+            answer, need_rag = self.bm25_search.search(query, threshold=0.85)
 
         if answer:
             # MySQL找到精确答案，直接返回

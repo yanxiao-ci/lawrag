@@ -3,8 +3,10 @@
     负责加载和分割文档
 """
 import os
+import re
 from base.config import config
 from base.logger import logger
+from base.law_parser import load_law_meta, chapter_of, cn2int
 from datetime import datetime
 from rag_qa.edu_document_loaders.edu_docloader import OCRDOCLoader
 from rag_qa.edu_document_loaders.edu_imgloader import OCRIMGLoader
@@ -12,9 +14,15 @@ from rag_qa.edu_document_loaders.edu_pdfloader import OCRPDFLoader
 from rag_qa.edu_document_loaders.edu_pptloader import OCRPPTLoader
 
 from rag_qa.edu_text_spliter.edu_chinese_recursive_text_splitter import ChineseRecursiveTextSplitter
+from rag_qa.edu_text_spliter.law_article_splitter import LawParentSplitter, LawChildSplitter
 from langchain_community.document_loaders import TextLoader
 from langchain_community.document_loaders.markdown import UnstructuredMarkdownLoader
 from langchain_text_splitters import MarkdownTextSplitter
+
+# 法条子块形如「《中华人民共和国行政处罚法》第五十七条 正文」
+LAW_CHILD_RE = re.compile(
+    r"^《(?P<law>[^》]+)》第(?P<num>[一二三四五六七八九十百千万零〇两0-9]{1,8})条"
+    r"(?:之(?P<suf>[一二三四五六七八九十]{1,3}))?")
 
 # 定义支持的文件类型及其对应的加载器字典
 document_loaders = {
@@ -100,14 +108,27 @@ def process_documents(directory_path,
     child_splitter = ChineseRecursiveTextSplitter(chunk_size=child_chunk_size, chunk_overlap=child_chunk_overlap)
     markdown_parent_splitter = MarkdownTextSplitter(chunk_size=parent_chunk_size, chunk_overlap=parent_chunk_overlap)
     markdown_child_splitter = MarkdownTextSplitter(chunk_size=child_chunk_size, chunk_overlap=child_chunk_overlap)
+    # 法条边界感知切分器（小改动 A）：child=单条法条，parent=连续若干条
+    law_parent_splitter = LawParentSplitter(group_size=5)
+    law_child_splitter = LawChildSplitter()
+    # P1 元数据：编/章/节 + 时效（law_meta.json 由 tools/expand_law_corpus.py 生成）
+    law_meta = load_law_meta(os.path.join(config.DATA_DIR, "law_meta.json"))
 
     for i, doc in enumerate(documents):
         # 获取文档的扩展名
         file_extension = os.path.splitext(doc.metadata["file_path"])[1].lower()
-        # 选择分割器
+        # 选择分割器：法律语料(目录名 law_data -> source=law) 走法条切分，markdown 走 markdown 切分，其余走通用切分
+        is_law = doc.metadata.get("source") == "law"
         is_markdown = file_extension == ".md"
-        parent_splitter_to_use = markdown_parent_splitter if is_markdown else parent_splitter
-        child_splitter_to_use = markdown_child_splitter if is_markdown else child_splitter
+        if is_law:
+            parent_splitter_to_use = law_parent_splitter
+            child_splitter_to_use = law_child_splitter
+        elif is_markdown:
+            parent_splitter_to_use = markdown_parent_splitter
+            child_splitter_to_use = markdown_child_splitter
+        else:
+            parent_splitter_to_use = parent_splitter
+            child_splitter_to_use = child_splitter
         # 获取所有的父块文档
         parent_docs = parent_splitter_to_use.split_documents([doc])
         for j, parent_doc in enumerate(parent_docs):
@@ -124,6 +145,16 @@ def process_documents(directory_path,
                 child_doc.metadata["parent_content"] = parent_doc.page_content
                 # 子块ID doc_{i}_parent_{j}_child_{k}
                 child_doc.metadata["id"] = parent_doc.metadata["id"] + f'_child_{k}'
+                # P1：给法条子块打上 法律名/条文号/编章节/时效，供 Milvus 标量过滤与溯源展示
+                if is_law:
+                    m = LAW_CHILD_RE.match(child_doc.page_content.strip())
+                    if m:
+                        law = m.group("law")
+                        child_doc.metadata["law_name"] = law
+                        child_doc.metadata["article_no"] = (
+                            f"第{m.group('num')}条" + (f"之{m.group('suf')}" if m.group("suf") else ""))
+                        child_doc.metadata["chapter"] = chapter_of(law_meta, law, cn2int(m.group("num")))
+                        child_doc.metadata["status"] = (law_meta.get(law) or {}).get("status", "有效")
                 child_chunks.append(child_doc)
                 logger.info(f"处理文档成功:父块{parent_doc.metadata['id']}:子块:{child_doc.metadata['id']}")
                 logger.warning('=' * 100)
