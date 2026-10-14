@@ -2,7 +2,7 @@
 """
 法律数据入库脚本
 ================
-把 rag_qa/data/law_data 的结构化结果写进 MySQL（《项目方案书》§7 步骤 1、§4.1）：
+把 rag_qa/data/law_data 的结构化结果写进 MySQL（设计文档§7 步骤 1、§4.1）：
   1) law_articles 表  <- law_data 解析出的全部法条（P0 扩容后：287 部法律 / 21255 条法条）
   2) law_faq 表          <- mysql_qa/data/law_qa.csv（由 tools/sample_law_faq.py 生成的 2 万条法律 FAQ）
 

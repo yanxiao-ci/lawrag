@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-把 law_data 切分并灌入 Milvus 集合（《项目方案书》§7 步骤 3~4）
+把 law_data 切分并灌入 Milvus 集合（设计文档§7 步骤 3~4）
 流程: process_documents(law_data) -> 法条边界切分 -> BGE-M3 向量化 -> 写入集合 lawrag。
 分批写入，便于观察进度、失败可重跑（按内容 md5 幂等 upsert）。
 用法:
