@@ -255,6 +255,7 @@ python rag_qa/rag_assessment/ragas_evaluate.py --data rag_qa/data/law_eval/ragas
 ## 8. 文档索引
 
 - [`docs/RAG项目流程图说明.md`](docs/RAG项目流程图说明.md)：三阶段流程图与逐环节说明（含 Mermaid 源码，图源文件 `docs/make_flowchart.py`）；
+- [`docs/项目概览.html`](docs/项目概览.html)：一页式项目概览（亮点 / 架构与流程 / 数据规模 / 评测结果 / 快速开始），浏览器直接打开；
 - 本文 §4～§6：环境搭建、建库顺序、评测怎么跑。
 
 > 数据规模评估与系统设计这两份文档属于作者本机资料，不随仓库发布；代码注释里提到的「设计文档 §X」指的就是它们。
