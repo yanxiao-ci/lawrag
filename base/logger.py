@@ -2,6 +2,8 @@
     日志管理模块
 """
 import logging
+# 导入日志轮转处理器（RotatingFileHandler）：日志按大小自动切分，避免单个文件无限涨大
+import logging.handlers
 # 导入路径操作库
 import os
 # 导入配置类
@@ -25,9 +27,12 @@ def setup_logger(logger_name='LawRAG', logger_file=config.LOG_FILE):
         stream_handler = logging.StreamHandler()
         # 3.2 设置日志级别为INFO
         stream_handler.setLevel(logging.DEBUG)
-        # 4. 创建文件处理器:FileHandler，并指定目录
-        # 4.1 创建文件处理对象
-        file_handler = logging.FileHandler(logger_file, mode='a', encoding='utf-8')
+        # 4. 创建文件处理器:RotatingFileHandler，并指定目录
+        # 4.1 创建文件处理对象：单个文件最多 10MB，保留 5 个历史文件（app.log.1 ~ app.log.5）
+        #     （原来用 FileHandler 不切分，长期跑下来单个 app.log 涨到了 83MB）
+        file_handler = logging.handlers.RotatingFileHandler(
+            logger_file, maxBytes=10 * 1024 * 1024, backupCount=5,
+            mode='a', encoding='utf-8')
         # 4.2 设置日志级别为DEBUG
         file_handler.setLevel(logging.INFO)
         # 5. 定义并设置日志格式：

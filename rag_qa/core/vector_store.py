@@ -387,12 +387,18 @@ class VectorStore:
             }
         )
 
-    # 定义私有方法，从子块中提取去重的父文档，里面只有内容
+    # 定义私有方法，从子块中提取去重的父文档（保留子块元数据，供上下文抬头使用）
     def _get_unique_parent_docs(self, child_chunks):
-        parent_contents = set()
+        # 2026-10-14 修复：原来只保留 page_content，把子块上的 法律名/条文号/编章节/时效 一起丢了，
+        # 结果是 new_rag_system._format_context_doc 打不出「【命中条文】《X》第Y条 · 章节 · 状态」抬头
+        # （问答块走 search_faq，元数据是全的，所以只有法条块缺抬头）。
+        # 现在按父块内容去重时顺带保留该父块第一个子块的元数据：正文一字不变，只是把来源信息补回来。
+        unique_parents = {}
         for chunk in child_chunks:
-            parent_contents.add(chunk.metadata.get('parent_content', chunk.page_content))
-        return [Document(page_content=content) for content in parent_contents]
+            content = chunk.metadata.get('parent_content', chunk.page_content)
+            if content not in unique_parents:
+                unique_parents[content] = Document(page_content=content, metadata=dict(chunk.metadata))
+        return list(unique_parents.values())
 
 # 测试
 if __name__ == '__main__':

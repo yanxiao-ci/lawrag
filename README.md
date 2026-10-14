@@ -271,4 +271,4 @@ python rag_qa/rag_assessment/ragas_evaluate.py --data rag_qa/data/law_eval/ragas
 教育版遗留文件（旧入口 `old_main.py`、旧 RAG 实现、旧前端、教育语料、旧评测集、Ollama 版评测脚本）已移到
 `_archive/edu_version/` 并在 `.gitignore` 中排除：仓库里不再有教培内容，但文件仍在本机、也仍在 git 历史里。
 
-还保留着原始名字的两处（改动会影响运行环境，需要时再动）：仓库目录名 `edu_rag/`、Gitee 仓库名 `financial-rag`。
+仓库目录与仓库名已统一为 `lawrag`（本地目录 `D:\Python-Project\lawrag`，Gitee 仓库同名为 `lawrag`）。
