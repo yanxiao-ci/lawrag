@@ -257,7 +257,6 @@ python rag_qa/rag_assessment/ragas_evaluate.py --data rag_qa/data/law_eval/ragas
 - [`docs/法律方向数据规模与升级项评估.md`](docs/法律方向数据规模与升级项评估.md)：数据规模评估、P0–P3 交付记录、检索与生成评测、快通道门控重标定、跨领域对照实验；
 - [`docs/项目方案书.md`](docs/项目方案书.md)：系统设计（切分策略、检索链路、提示词与评测口径）；
 - [`docs/RAG项目流程图说明.md`](docs/RAG项目流程图说明.md)：三阶段流程图与逐环节说明（含 Mermaid 源码）；
-- [`docs/项目展示.html`](docs/项目展示.html)：一页式项目展示（背景 / 核心要点 / 简历 / 业务流程 / 成果数据），浏览器直接打开。
 
 ---
 

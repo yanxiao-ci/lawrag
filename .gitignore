@@ -27,3 +27,7 @@ __pycache__/
 
 # 本地环境变量（含 API Key，禁止入库）
 .env
+
+# 个人简历 / 面试准备用的项目展示页（留在本机，不进公开仓库）
+/docs/项目展示.html
+/docs/index.html
