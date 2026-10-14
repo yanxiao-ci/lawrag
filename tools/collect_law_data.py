@@ -56,7 +56,7 @@ RETRIEVAL_FILE = "finetune_dataset.jsonl"
 QA_TEST_FILE = "laws_data_50k_test.jsonl"
 
 SESSION = requests.Session()
-SESSION.headers.update({"User-Agent": "Mozilla/5.0 (edu_rag law-data collector)"})
+SESSION.headers.update({"User-Agent": "Mozilla/5.0 (lawrag law-data collector)"})
 
 
 def log(msg):

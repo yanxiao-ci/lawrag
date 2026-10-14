@@ -211,7 +211,7 @@ def fig_overview():
 
     yA2 = 290
     b1 = (70, yA2, 250, 84, "法律问答 CSV\nlaw_qa.csv · 20,000 条", "io", 13)
-    b2 = (350, yA2, 250, 84, "写入 MySQL\n表 jpkb", "store", 13)
+    b2 = (350, yA2, 250, 84, "写入 MySQL\n表 law_faq", "store", 13)
     b3 = (630, yA2, 250, 84, "Redis 问题列表\n原文 + Jieba 分词", "store", 13)
     b4 = (910, yA2, 250, 84, "BM25Okapi 双索引\n法条正文 + 问答问题", "proc", 13)
     b5 = (1190, yA2, 620, 84, "命中判定 = 词面判据：问答看词集合 Jaccard ≥ 0.85，法条看查询词覆盖率 ≥ 0.85\n阈值由 tools/tune_fast_channel_gate.py 标定；命中后写 Redis 缓存 answer:{问题}（TTL 7 天）", "note", 13)
@@ -222,7 +222,7 @@ def fig_overview():
     a.append(arrow([(1160, yA2 + 42), (1190, yA2 + 42)], color="#94a3b8", dash="6 5", marker="#ahgray"))
 
     yA3 = 400
-    c1 = (70, yA3, 250, 84, "jpkb 法律问答\n20,000 条", "io", 13)
+    c1 = (70, yA3, 250, 84, "law_faq 法律问答\n20,000 条", "io", 13)
     c2 = (350, yA3, 250, 84, "BGE-M3 向量化\n（问题 + 答案）", "proc", 13)
     c3 = (630, yA3, 250, 84, "写入 Milvus\n集合 lawfaq · 20,000 条", "store", 13)
     c4 = (910, yA3, 900, 84, "为什么单独一个集合：法条集合的检索强制 status ==「有效」，问答条目没有这个字段，混进去会被整条过滤掉", "note", 13)
@@ -233,7 +233,7 @@ def fig_overview():
     a.append(arrow([(880, yA3 + 42), (910, yA3 + 42)], color="#94a3b8", dash="6 5", marker="#ahgray"))
     a.append(arrow([(475, yA2 + 84), (475, 392), (195, 392), (195, yA3)],
                    color="#64748b", dash="6 5", marker="#ahgray"))
-    a.append(label(500, 392, "读 jpkb 的问答", size=12, weight="normal",
+    a.append(label(500, 392, "读 law_faq 的问答", size=12, weight="normal",
                    fill="#64748b", anchor="start"))
 
     # ---------------- B 在线问答 ----------------
@@ -365,7 +365,7 @@ def fig_indexing():
 
     y4 = 670
     z1 = (70, y4, 340, 86, "law_qa.csv\n20,000 条法律问答", "io", 13)
-    z2 = (450, y4, 340, 86, "MySQL 表 jpkb\nsubject_name · question · answer", "store", 13)
+    z2 = (450, y4, 340, 86, "MySQL 表 law_faq\ndomain · question · answer", "store", 13)
     z3 = (830, y4, 340, 86, "Redis 问题列表\nqa_original_questions / qa_tokenized_questions", "store", 12)
     z4 = (1210, y4, 520, 86, "BM25Okapi 双索引（法条正文 + 问答问题）\n门控：词集合 Jaccard ≥ 0.85 / 查询词覆盖率 ≥ 0.85", "proc", 12)
     for t in (z1, z2, z3, z4):
@@ -375,7 +375,7 @@ def fig_indexing():
     a.append(arrow([(1170, y4 + 43), (1210, y4 + 43)]))
 
     y5 = 798
-    w1 = (70, y5, 340, 86, "jpkb 20,000 条\n（问题 + 答案）", "io", 13)
+    w1 = (70, y5, 340, 86, "law_faq 20,000 条\n（问题 + 答案）", "io", 13)
     w2 = (450, y5, 340, 86, "BGE-M3 向量化", "proc", 13)
     w3 = (830, y5, 340, 86, "写入 Milvus\n集合 lawfaq · 20,000 条", "store", 13)
     w4 = (1210, y5, 520, 86, "在线用途：RAG 第三召回源\nFAQ_RETRIEVAL_K = 3 → 精排后注入 FAQ_INJECT_N = 2 条", "note", 12)
@@ -450,7 +450,7 @@ def fig_faq():
     s1 = (cx[0], dy4, bw, dec_h, "法条通道：查询词覆盖率 ≥ 0.85？\n（查询基本就是这条条文）", "dec", 13)
     s2 = (cx[1], by4, bw, box_h, "返回该法条原文\n并写 Redis 缓存", "term", 13)
     s3 = (cx[2], dy4, bw, dec_h, "问答通道：词集合 Jaccard ≥ 0.85？\n（就是同一个问题）", "dec", 13)
-    s4 = (cx[3], by4, bw, box_h, "MySQL 表 jpkb 取标准答案\n并写 Redis 缓存", "proc", 13)
+    s4 = (cx[3], by4, bw, box_h, "MySQL 表 law_faq 取标准答案\n并写 Redis 缓存", "proc", 13)
     for t in (s1, s2, s3, s4):
         n.append(node(*t))
     a.append(arrow([(cx[3], by3 + box_h), (cx[3], 800), (cx[0] + bw / 2, 800), (cx[0] + bw / 2, dy4)]))

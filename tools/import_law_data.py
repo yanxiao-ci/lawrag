@@ -4,15 +4,15 @@
 ================
 把 rag_qa/data/law_data 的结构化结果写进 MySQL（《法律方向改造方案书》§7 步骤 1、§4.1）：
   1) law_articles 表  <- law_data 解析出的全部法条（P0 扩容后：287 部法律 / 21255 条法条）
-  2) jpkb 表          <- mysql_qa/data/law_qa.csv（由 tools/sample_law_faq.py 生成的 2 万条法律 FAQ）
+  2) law_faq 表          <- mysql_qa/data/law_qa.csv（由 tools/sample_law_faq.py 生成的 2 万条法律 FAQ）
 
 用法:
-  python tools/import_law_data.py            # 入库 law_articles + 重建 jpkb
+  python tools/import_law_data.py            # 入库 law_articles + 重建 law_faq
   python tools/import_law_data.py --law-only # 只入库 law_articles
-  python tools/import_law_data.py --qa-only  # 只重建 jpkb
+  python tools/import_law_data.py --qa-only  # 只重建 law_faq
 
 注意:
-  - 重建 jpkb 会先清空该表；原始 IT 问答数据仍保留在 mysql_qa/data/JP学科知识问答.csv，可回滚。
+  - 重建 law_faq 会先清空该表；原始 IT 问答数据已归档在 _archive/edu_version/JP学科知识问答.csv，可回滚。
   - law_qa.csv 由 tools/sample_law_faq.py 生成（领域均衡 + 引用可核对），本脚本只负责入库。
 """
 
@@ -56,16 +56,16 @@ def import_law_qa(client):
         raise SystemExit(f"缺少 {LAW_QA_CSV}，请先运行: python tools/sample_law_faq.py")
     with open(LAW_QA_CSV, encoding="utf-8") as fi:
         n = sum(1 for _ in csv.DictReader(fi))
-    client.cursor.execute("TRUNCATE TABLE jpkb")
-    client.insert_jpkb_csv(LAW_QA_CSV)
-    client.cursor.execute("SELECT COUNT(*) FROM jpkb")
+    client.cursor.execute("TRUNCATE TABLE law_faq")
+    client.insert_faq_csv(LAW_QA_CSV)
+    client.cursor.execute("SELECT COUNT(*) FROM law_faq")
     return n, client.cursor.fetchone()[0]
 
 
 def main():
     ap = argparse.ArgumentParser(description="法律数据入库")
     ap.add_argument("--law-only", action="store_true", help="只入库 law_articles")
-    ap.add_argument("--qa-only", action="store_true", help="只重建 jpkb 法律问答")
+    ap.add_argument("--qa-only", action="store_true", help="只重建 law_faq 法律问答")
     args = ap.parse_args()
 
     client = MySQLClient()
@@ -77,7 +77,7 @@ def main():
             print(f"[law_articles] 解析 {parsed} 条 -> 库内 {total} 条，按时效分布 {stat}")
         if not args.law_only:
             built, total = import_law_qa(client)
-            print(f"[jpkb] 生成 {built} 条法律问答 -> 库内 {total} 条 (CSV: {LAW_QA_CSV})")
+            print(f"[law_faq] 生成 {built} 条法律问答 -> 库内 {total} 条 (CSV: {LAW_QA_CSV})")
     finally:
         client.close()
 

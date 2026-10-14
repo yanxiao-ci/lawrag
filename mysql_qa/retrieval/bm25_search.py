@@ -1,9 +1,9 @@
 """
     mysql_qa 检索     法条 BM25 + 法律问答 FAQ
     改造要点（《法律方向改造方案书》§6.1）:
-      检索源从 jpkb 的「问题」改为 law_articles 的「法条正文」——
+      检索源从 law_faq 的「问题」改为 law_articles 的「法条正文」——
       法律术语（表见代理、善意取得等）精确匹配比向量更强；
-      法条未命中时，再用 jpkb 的法律问答做一层 FAQ 兜底。
+      法条未命中时，再用 law_faq 的法律问答做一层 FAQ 兜底。
     门控（2026-10-14 重标定）:
       命中判定不再用「全库 softmax 分 > 0.85」（语料扩容后过松，真实问题 90% 被抢答、约一半答错），
       改成词面判据：法条通道看「查询词覆盖率」，FAQ 通道看「词集合 Jaccard」。
@@ -44,7 +44,7 @@ class BM25Search:
             logger.info(f"法条 BM25 初始化完成，共 {len(articles)} 条")
         else:
             logger.warning("法条语料为空")
-        # 兜底：法律问答（jpkb）
+        # 兜底：法律问答（law_faq）
         self.faq_questions = self.mysql_client.fetch_questions()
         if self.faq_questions:
             self.faq_bm25 = BM25Okapi([preprocess_text(q[0]) for q in self.faq_questions])

@@ -30,7 +30,7 @@
 | 法律原文（.txt） | `rag_qa/data/law_data/` | **292 个文件 / 4.2 MB**（288 部现行 + 4 个历史版本） |
 | 法条表 | MySQL `law_articles` | **21,565 条**（现行有效 21,312 + 历史版本 253） |
 | 法条向量 | Milvus `lawrag`（子块 = 单条法条，父块 = 同法连续 5 条） | **55,847 个子块** |
-| 法律问答 | MySQL `jpkb` / `mysql_qa/data/law_qa.csv` | **20,000 条** |
+| 法律问答 | MySQL `law_faq` / `mysql_qa/data/law_qa.csv` | **20,000 条** |
 | 问答向量 | Milvus `lawfaq`（第三召回源） | **20,000 条** |
 
 数据来源：
@@ -58,7 +58,7 @@
    父子关系写入元数据），避免通用递归切分把法条拦腰截断导致引用不准；
 2. BGE-M3 向量化（稠密 1024 维 + 稀疏向量）→ 写入 Milvus 集合 `lawrag`；
 3. 法条结构化信息 → MySQL `law_articles`（含编/章/节、公布日、施行日、时效状态）；
-4. 2 万条法律问答 → MySQL `jpkb` + Redis 问题列表 → BM25 检索器就绪；
+4. 2 万条法律问答 → MySQL `law_faq` + Redis 问题列表 → BM25 检索器就绪；
 5. 2 万条问答向量化 → Milvus 集合 `lawfaq`（RAG 的第三召回源）。
 
 **B · 在线问答（每次请求）**
@@ -90,11 +90,11 @@
 
 | 服务 | 默认地址 | 说明 |
 | --- | --- | --- |
-| MySQL 8 | `192.168.229.128:3307` | 库 `subjects_kg`，表 `law_articles` / `jpkb` / 会话历史 |
+| MySQL 8 | `192.168.229.128:3307` | 库 `subjects_kg`，表 `law_articles` / `law_faq` / 会话历史 |
 | Redis | `192.168.229.128:6379` | 快通道缓存与会话缓存 |
 | Milvus | `192.168.229.128:19530` | 库 `itcast`，集合 `lawrag` / `lawfaq` |
 
-`docker-compose.yml` 只包含应用本身（`edurag-app`），三个依赖服务需自行部署（Milvus standalone 需要 etcd + minio）。
+`docker-compose.yml` 只包含应用本身（`lawrag-app`），三个依赖服务需自行部署（Milvus standalone 需要 etcd + minio）。
 
 ### 4.2 Python 环境
 
@@ -153,7 +153,7 @@ CUSTOMER_SERVICE_PHONE=13000000000
 ### 4.5 建库（顺序不能换）
 
 ```bash
-# 1) 法条 + 问答入库 MySQL（会 TRUNCATE 后重写 law_articles / jpkb）
+# 1) 法条 + 问答入库 MySQL（会 TRUNCATE 后重写 law_articles / law_faq）
 python tools/import_law_data.py
 
 # 2) 法条向量库：语料换过必须加 --reset，否则新旧语料块会混在同一个集合里
@@ -187,7 +187,7 @@ python app.py          # 或 uvicorn app:app --host 0.0.0.0 --port 8080
 ## 5. 目录结构
 
 ```
-edu_rag/
+lawrag/
 ├─ app.py                     # FastAPI 入口（HTTP + WebSocket 流式）
 ├─ new_main.py                # 在线问答总调度：问候语 → 条文号路由 → 快通道 → RAG
 ├─ config.ini / .env          # 配置（.env 覆盖 config.ini，已 gitignore）
@@ -195,7 +195,8 @@ edu_rag/
 ├─ mysql_qa/                  # 快问快答通道：MySQL / Redis / BM25 检索与门控
 ├─ rag_qa/
 │  ├─ core/                   # 意图识别、策略选择、向量库、检索、提示词、引用校验
-│  ├─ edu_text_spliter/       # 法条边界切分器（law_article_splitter.py）
+│  ├─ document_loaders/       # PDF/Word/PPT/图片 加载器 + OCR
+│  ├─ text_splitters/         # 法条边界切分器（law_article_splitter.py）+ 通用中文切分
 │  ├─ models/                 # 模型权重（不入库）
 │  ├─ data/                   # 法律原文、分类数据、评测产物
 │  └─ rag_assessment/         # RAGAS 评测脚本
@@ -203,6 +204,9 @@ edu_rag/
 ├─ tools/                     # 数据采集 / 建库 / 评测 / 调参脚本
 └─ docs/                      # 流程图与改造记录
 ```
+
+> 教育版遗留（旧入口 `old_main.py`、旧前端、教育语料、旧评测集等）已移到根目录 `_archive/edu_version/`，
+> 并在 `.gitignore` 中排除——仓库主体只保留法律版；这些文件仍在 git 历史里，可随时找回。
 
 ---
 
@@ -248,3 +252,23 @@ python rag_qa/rag_assessment/ragas_evaluate.py --data rag_qa/data/law_eval/ragas
 ## 9. 免责声明
 
 本项目为学习 / 求职作品，语料为公开法规原文与公开问答数据集，**输出内容不构成法律意见**，请勿用于真实法律决策。
+
+---
+
+## 10. 命名说明（2026-10-14 统一清理）
+
+项目从教培场景改造而来，早期留下的教培命名已经统一改掉：
+
+| 旧名 | 新名 |
+| --- | --- |
+| `rag_qa/edu_document_loaders/edu_*.py` | `rag_qa/document_loaders/`（`pdf_loader.py` / `doc_loader.py` / `ppt_loader.py` / `img_loader.py` / `ocr.py`） |
+| `rag_qa/edu_text_spliter/edu_*.py` | `rag_qa/text_splitters/`（`chinese_recursive_text_splitter.py` / `model_text_splitter.py`） |
+| MySQL 表 `jpkb`、列 `subject_name` | 表 `law_faq`、列 `domain` |
+| 问答 CSV 列 `学科名称` | `法律领域` |
+| 日志器 / 容器 / 镜像名 `EduRAG` `edurag-app` `edurag:v7.5` | `LawRAG` `lawrag-app` `lawrag:v7.5` |
+| 代码注释、日志、CLI 提示里的「学科」 | 「来源 / 知识库来源」 |
+
+教育版遗留文件（旧入口 `old_main.py`、旧 RAG 实现、旧前端、教育语料、旧评测集、Ollama 版评测脚本）已移到
+`_archive/edu_version/` 并在 `.gitignore` 中排除：仓库里不再有教培内容，但文件仍在本机、也仍在 git 历史里。
+
+还保留着原始名字的两处（改动会影响运行环境，需要时再动）：仓库目录名 `edu_rag/`、Gitee 仓库名 `financial-rag`。

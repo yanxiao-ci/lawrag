@@ -55,8 +55,8 @@
 三条并行链路，共用同一份法条原文：
 
 1. **RAG 法条向量库**：法条原文 → 法条解析（法律名 / 条号 / 正文）→ 法条边界切分（子块 = 一条完整法条，父块 = 同法连续 5 条）→ BGE-M3 向量化 → upsert 到 Milvus 集合 `lawrag`（55,847 块）。
-2. **结构化法条表 + 快问快答库**：法条入库 MySQL `law_articles`（含编/章/节、公布日、施行日、时效状态）→ 供条文号精确路由与法条 BM25 使用；`law_qa.csv`（2 万条）→ MySQL 表 `jpkb` → Redis 问题列表 → BM25Okapi 双索引。
-3. **问答向量库**：`jpkb` 的 2 万条问答 → BGE-M3 向量化 → Milvus 集合 `lawfaq`，作为 RAG 的**第三召回源**。
+2. **结构化法条表 + 快问快答库**：法条入库 MySQL `law_articles`（含编/章/节、公布日、施行日、时效状态）→ 供条文号精确路由与法条 BM25 使用；`law_qa.csv`（2 万条）→ MySQL 表 `law_faq` → Redis 问题列表 → BM25Okapi 双索引。
+3. **问答向量库**：`law_faq` 的 2 万条问答 → BGE-M3 向量化 → Milvus 集合 `lawfaq`，作为 RAG 的**第三召回源**。
 
 两个容易踩的坑（都在图里标了）：
 
@@ -122,7 +122,7 @@ flowchart TD
     direction LR
     D[/法律法规原文 .txt 292 部/] --> S[法条解析 + 边界切分<br/>子块=单条法条 · 父块=连续 5 条] --> V[BGE-M3 向量化] --> MV[(Milvus 集合 lawrag · 55,847 块)]
     D --> MY[(MySQL 表 law_articles · 21,565 条)]
-    C2[/law_qa.csv 2 万条/] --> J[(MySQL 表 jpkb)] --> R[(Redis 问题列表)] --> BM[BM25Okapi 双索引]
+    C2[/law_qa.csv 2 万条/] --> J[(MySQL 表 law_faq)] --> R[(Redis 问题列表)] --> BM[BM25Okapi 双索引]
     J --> FV[(Milvus 集合 lawfaq · 2 万条)]
   end
 
@@ -149,7 +149,7 @@ flowchart LR
   subgraph S2[② 结构化法条表 + 快问快答库 + ③ 问答向量库]
     direction LR
     B1[(MySQL 表 law_articles<br/>21,565 条 + 编/章/节 + 时效)]
-    B2[/law_qa.csv 20,000 条/] --> B3[(MySQL 表 jpkb)]
+    B2[/law_qa.csv 20,000 条/] --> B3[(MySQL 表 law_faq)]
     B3 --> B4[(Redis 问题列表 原文+分词)]
     B4 --> B5["BM25Okapi 双索引<br/>法条正文 + 问答问题"]
     B3 --> B6["BGE-M3 向量化"] --> B7[(Milvus 集合 lawfaq · 20,000 条)]
@@ -172,7 +172,7 @@ flowchart LR
   H --> I{"法条通道：查询词覆盖率 ≥ 0.85?"}
   I -- 是 --> I1["返回该法条原文 + 写 Redis 缓存"] --> I2([返回答案])
   I -- 否 --> J{"问答通道：词集合 Jaccard ≥ 0.85?"}
-  J -- 是 --> J1["MySQL 表 jpkb 取标准答案 + 写 Redis 缓存"] --> J2([返回答案])
+  J -- 是 --> J1["MySQL 表 law_faq 取标准答案 + 写 Redis 缓存"] --> J2([返回答案])
   J -- 否 --> K["回退 RAG 通道（图 4）"]
 ```
 
@@ -217,11 +217,13 @@ flowchart TD
 | 总调度：条文号精确路由 → 快通道 → 回退 RAG | `new_main.py`（`IntegratedQASystem.query` / `_answer_by_citation`） |
 | 会话历史读写（保留 5 轮） | `new_main.py`（`init_conversation_table` / `update_session_history`） |
 | 条文引用抽取（《X法》第 Y 条）与法条解析 | `base/law_parser.py`（`extract_citation` / `parse_law_text` / `chapter_of`） |
-| MySQL 连接、`law_articles` / `jpkb` 表、条文精确查 | `mysql_qa/db/mysql_client.py` |
+| MySQL 连接、`law_articles` / `law_faq` 表、条文精确查 | `mysql_qa/db/mysql_client.py` |
 | Redis 缓存（答案 / 问题列表 / 会话） | `mysql_qa/cache/redis_client.py` |
 | Jieba 分词预处理 | `mysql_qa/utils/preprocess.py` |
 | BM25 双索引、词面门控（Jaccard / 覆盖率） | `mysql_qa/retrieval/bm25_search.py` |
-| 法条边界切分（子块 = 单条法条，父块 = 连续 5 条） | `rag_qa/edu_text_spliter/law_article_splitter.py` |
+| 法条边界切分（子块 = 单条法条，父块 = 连续 5 条） | `rag_qa/text_splitters/law_article_splitter.py` |
+| 通用中文递归切分器 | `rag_qa/text_splitters/chinese_recursive_text_splitter.py` |
+| PDF/Word/PPT/图片 加载器与 OCR | `rag_qa/document_loaders/`（`pdf_loader.py` / `doc_loader.py` / `ppt_loader.py` / `img_loader.py` / `ocr.py`） |
 | 文档处理入口 | `rag_qa/core/document_processor.py` |
 | BGE-M3 向量化、Milvus 集合、混合检索 + 重排、FAQ 集合 | `rag_qa/core/vector_store.py` |
 | BERT 意图识别（通用知识 / 专业咨询） | `rag_qa/core/query_classifier.py`（模型 `rag_qa/models/bert_query_classifier_law`） |

@@ -106,7 +106,7 @@
 <text x="1160.0" y="891.4" font-size="13" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">问答通道：词集合 Jaccard ≥ 0.85？</text>
 <text x="1160.0" y="908.6" font-size="13" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">（就是同一个问题）</text>
 <rect x="1400.0" y="852.0" width="400.0" height="96.0" rx="9" ry="9" fill="#eef4ff" stroke="#3b6fd4" stroke-width="2.0"/>
-<text x="1600.0" y="891.4" font-size="13" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">MySQL 表 jpkb 取标准答案</text>
+<text x="1600.0" y="891.4" font-size="13" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">MySQL 表 law_faq 取标准答案</text>
 <text x="1600.0" y="908.6" font-size="13" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">并写 Redis 缓存</text>
 <rect x="80.0" y="1080.0" width="400.0" height="96.0" rx="8" ry="8" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="7 5"/>
 <text x="280.0" y="1120.1" font-size="12" font-weight="normal" fill="#475569" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">旧判据为什么废掉：全库 Softmax 归一化分会随语料规模漂移</text>

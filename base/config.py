@@ -26,8 +26,8 @@ class Config:
         self.DATA_DIR = os.path.join(self.PROJECT_ROOT, 'rag_qa/data')
         # 模型目录
         self.MODELS_DIR = os.path.join(self.PROJECT_ROOT, 'rag_qa/models')
-        # 文档加载器目录
-        self.EDU_DOCUMENT_LOADERS_DIR = os.path.join(self.PROJECT_ROOT, 'rag_qa/edu_document_loaders')
+        # 文档加载器目录（PDF/Word/PPT/图片 → 文本 + OCR）
+        self.DOCUMENT_LOADERS_DIR = os.path.join(self.PROJECT_ROOT, 'rag_qa/document_loaders')
 
         if config_file is None:
             config_file = os.path.join(self.PROJECT_ROOT, 'config.ini')
@@ -67,12 +67,12 @@ class Config:
                                               self.config.get('milvus', 'database_name', fallback='itcast'))
         # Milvus 集合名
         self.MILVUS_COLLECTION_NAME = os.getenv('MILVUS_COLLECTION_NAME',
-                                                self.config.get('milvus', 'collection_name', fallback='edurag'))
+                                                self.config.get('milvus', 'collection_name', fallback='lawrag'))
 
         # LLM 配置
         # LLM 模型名
         # self.LLM_MODEL = os.getenv('LLM_MODEL', self.config.get('llm', 'model', fallback='qwen3.7-max-preview'))
-        self.LLM_MODEL = os.getenv('LLM_MODEL', self.config.get('llm', 'model', fallback='qwen3.8-flash'))
+        self.LLM_MODEL = os.getenv('LLM_MODEL', self.config.get('llm', 'model', fallback='qwen3.8-max'))
         # DashScope API 密钥
         self.DASHSCOPE_API_KEY = os.getenv('DASHSCOPE_API_KEY',
                                            self.config.get('llm', 'dashscope_api_key',
@@ -109,7 +109,7 @@ class Config:
         # 有效来源列表
         self.VALID_SOURCES = eval(
             os.getenv('VALID_SOURCES',
-                      self.config.get('app', 'valid_sources', fallback='["ai", "java", "test", "ops", "bigdata"]')))
+                      self.config.get('app', 'valid_sources', fallback='["law"]')))
         # 客服电话
         self.CUSTOMER_SERVICE_PHONE = os.getenv('CUSTOMER_SERVICE_PHONE',
                                                 self.config.get('app', 'customer_service_phone',

@@ -1,8 +1,8 @@
 services:
-  edurag-app:
+  lawrag-app:
 #    build: .
-    image: edurag:v7.5
-    container_name: edurag-app
+    image: lawrag:v7.5
+    container_name: lawrag-app
     ports:
       # 宿主机端口:容器运行占用的端口
       - "${APP_PORT:-8080}:8080"
@@ -29,11 +29,11 @@ services:
       - MILVUS_HOST=${MILVUS_HOST:-milvus}
       - MILVUS_PORT=${MILVUS_PORT:-19530}
       - MILVUS_DATABASE_NAME=${MILVUS_DATABASE_NAME:-itcast}
-      - MILVUS_COLLECTION_NAME=${MILVUS_COLLECTION_NAME:-edurag}
+      - MILVUS_COLLECTION_NAME=${MILVUS_COLLECTION_NAME:-lawrag}
       
       # LLM 配置
       - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY:-sk-your-key-here}
-      - LLM_MODEL=${LLM_MODEL:-qwen3.7-max-preview}
+      - LLM_MODEL=${LLM_MODEL:-qwen3.8-max}
       - DASHSCOPE_BASE_URL=${DASHSCOPE_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
       
       # 检索参数配置
@@ -45,7 +45,7 @@ services:
       - CANDIDATE_M=${CANDIDATE_M:-2}
       
       # 应用配置
-      - VALID_SOURCES=${VALID_SOURCES:-["ai", "java", "test", "ops", "bigdata"]}
+      - VALID_SOURCES=${VALID_SOURCES:-["law"]}
       - CUSTOMER_SERVICE_PHONE=${CUSTOMER_SERVICE_PHONE:-12345678}
 
     volumes:

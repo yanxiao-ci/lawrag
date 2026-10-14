@@ -1,7 +1,7 @@
 """
     百炼千问模型
 """
-# 导入 argparse，用于指定评测数据文件（默认仍然是教育版小集）
+# 导入 argparse，用于指定评测数据文件（默认用法律版评测集收集出的答案文件）
 import argparse
 # 导入 os，用于把相对路径解析成相对脚本所在目录
 import os
@@ -36,9 +36,10 @@ from base.config import config
 DIR = os.path.dirname(os.path.abspath(__file__))
 
 parser = argparse.ArgumentParser(description="RAGAS 评测（支持换数据集）")
-parser.add_argument("--data", default=os.path.join(DIR, "rag_evaluate_data_small.json"),
-                    help="评测数据：JSON 列表，每条含 question/context/answer/ground_truth")
-parser.add_argument("--out", default=os.path.join(DIR, "ragas_evaluation_results.csv"),
+LAW_EVAL_DIR = os.path.normpath(os.path.join(DIR, "..", "data", "law_eval", "ragas"))
+parser.add_argument("--data", default=os.path.join(LAW_EVAL_DIR, "law_ragas_answers.json"),
+                    help="评测数据：JSON 列表，每条含 question/contexts/answer/ground_truth")
+parser.add_argument("--out", default=os.path.join(LAW_EVAL_DIR, "ragas_law.csv"),
                     help="结果 CSV 输出路径")
 parser.add_argument("--limit", type=int, default=0, help="只评测前 N 条（调试用，0=全部）")
 parser.add_argument("--start", type=int, default=0, help="从第几条开始（分批跑用）")

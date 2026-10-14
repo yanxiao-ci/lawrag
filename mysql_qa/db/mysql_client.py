@@ -34,9 +34,9 @@ class MySQLClient:
     # 创建表
     def create_table(self):
         create_table_query = '''
-            CREATE TABLE IF NOT EXISTS jpkb (
+            CREATE TABLE IF NOT EXISTS law_faq (
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                subject_name VARCHAR(20),
+                domain VARCHAR(20),
                 question VARCHAR(1000),
                 answer VARCHAR(1000))
             '''
@@ -55,8 +55,8 @@ class MySQLClient:
             logger.info(f"data: {type(data)}")
             for _, row in data.iterrows():
                 logger.info(f"row: {row}")
-                sql = 'INSERT INTO jpkb (subject_name, question, answer) VALUES (%s, %s, %s)'
-                res = self.cursor.execute(sql, (row['学科名称'], row['问题'], row['答案']))
+                sql = 'INSERT INTO law_faq (domain, question, answer) VALUES (%s, %s, %s)'
+                res = self.cursor.execute(sql, (row['法律领域'], row['问题'], row['答案']))
             # 提交事务
             self.connection.commit()
             logger.info(f"数据插入成功:{res}")
@@ -132,18 +132,18 @@ class MySQLClient:
             self.connection.rollback()
             raise
 
-    # 批量导入 jpkb（法律问答），不逐行打日志
-    def insert_jpkb_csv(self, csv_path):
-        sql = 'INSERT INTO jpkb (subject_name, question, answer) VALUES (%s, %s, %s)'
+    # 批量导入 law_faq（法律问答），不逐行打日志
+    def insert_faq_csv(self, csv_path):
+        sql = 'INSERT INTO law_faq (domain, question, answer) VALUES (%s, %s, %s)'
         try:
             data = pd.read_csv(csv_path)
-            rows = list(zip(data['学科名称'], data['问题'], data['答案']))
+            rows = list(zip(data['法律领域'], data['问题'], data['答案']))
             res = self.cursor.executemany(sql, rows)
             self.connection.commit()
-            logger.info(f"jpkb 导入成功:{res}")
+            logger.info(f"law_faq 导入成功:{res}")
             return res
         except Exception as e:
-            logger.error(f"jpkb 导入失败: {e}")
+            logger.error(f"law_faq 导入失败: {e}")
             self.connection.rollback()
             raise
 
@@ -208,7 +208,7 @@ class MySQLClient:
     def fetch_questions(self):
         try:
             # 执行SQL
-            self.cursor.execute('SELECT question FROM jpkb')
+            self.cursor.execute('SELECT question FROM law_faq')
             # 获取结果
             res = self.cursor.fetchall()
             # 其中一个元素：('用上下文管理器实现函数运行时间的计算?',)
@@ -226,7 +226,7 @@ class MySQLClient:
     def fetch_answer(self, question):
         try:
             # 执行查询
-            self.cursor.execute("SELECT answer FROM jpkb WHERE question=%s", (question,))
+            self.cursor.execute("SELECT answer FROM law_faq WHERE question=%s", (question,))
             # 获取结果，一条记录是一个tuple
             result = self.cursor.fetchone()
             # 返回答案或 None
@@ -252,9 +252,9 @@ class MySQLClient:
 if __name__ == '__main__':
     mysql_client = MySQLClient()
     mysql_client.create_table()
-    data_dir = r'..\data\JP学科知识问答.csv'
+    data_dir = r'..\data\law_qa.csv'
     mysql_client.insert_data(data_dir)
     mysql_client.fetch_questions()
-    answer = mysql_client.fetch_answer('用上下文管理器实现函数运行时间的计算?')
+    answer = mysql_client.fetch_answer('租房合同到期，房东不退押金怎么办？')
     print(f'answer:{answer}')
     mysql_client.close()

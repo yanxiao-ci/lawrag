@@ -3,7 +3,7 @@
 法律 FAQ 抽样（P0）
 ==================
 把 Brench 法律问答（合成风格，答案自带《X法》第Y条 引用）按「领域均衡 + 法条可核对」
-抽成 jpkb 可直接入库的 CSV，替换原来那批「为了迁就 97 部语料筛出来」的问答。
+抽成 law_faq 可直接入库的 CSV，替换原来那批「为了迁就 97 部语料筛出来」的问答。
 筛选与配额规则:
   1) 答案里引用的法律必须都在当前语料（law_data）里；
   2) 引用的条文号必须真实存在于该法律的条号集合里（按 law_data 实际内容核对）；
@@ -200,7 +200,7 @@ def main():
             for law in cited:
                 cited_counter[law] += 1
             d = domain_of(cited, hints, q + a)
-            domain_pool.setdefault(d, []).append({"学科名称": d, "问题": q, "答案": a})
+            domain_pool.setdefault(d, []).append({"法律领域": d, "问题": q, "答案": a})
 
     log(f"\n== 筛选统计（源：{os.path.basename(args.src)}）==")
     for k in ["源总行数", "无法律引用", "引用了语料外的法律", "条号不存在于语料", "重复问题"]:
@@ -242,10 +242,10 @@ def main():
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "w", encoding="utf-8", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=["学科名称", "问题", "答案"])
+        w = csv.DictWriter(f, fieldnames=["法律领域", "问题", "答案"])
         w.writeheader()
         w.writerows(chosen)
-    c = Counter(x["学科名称"] for x in chosen)
+    c = Counter(x["法律领域"] for x in chosen)
     log(f"\n已写入 {len(chosen)} 条 -> {os.path.relpath(args.out, ROOT)}")
     for d in DOMAIN_ORDER:
         if c.get(d):

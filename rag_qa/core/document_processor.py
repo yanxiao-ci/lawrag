@@ -8,13 +8,13 @@ from base.config import config
 from base.logger import logger
 from base.law_parser import load_law_meta, chapter_of, cn2int
 from datetime import datetime
-from rag_qa.edu_document_loaders.edu_docloader import OCRDOCLoader
-from rag_qa.edu_document_loaders.edu_imgloader import OCRIMGLoader
-from rag_qa.edu_document_loaders.edu_pdfloader import OCRPDFLoader
-from rag_qa.edu_document_loaders.edu_pptloader import OCRPPTLoader
+from rag_qa.document_loaders.doc_loader import OCRDOCLoader
+from rag_qa.document_loaders.img_loader import OCRIMGLoader
+from rag_qa.document_loaders.pdf_loader import OCRPDFLoader
+from rag_qa.document_loaders.ppt_loader import OCRPPTLoader
 
-from rag_qa.edu_text_spliter.edu_chinese_recursive_text_splitter import ChineseRecursiveTextSplitter
-from rag_qa.edu_text_spliter.law_article_splitter import LawParentSplitter, LawChildSplitter
+from rag_qa.text_splitters.chinese_recursive_text_splitter import ChineseRecursiveTextSplitter
+from rag_qa.text_splitters.law_article_splitter import LawParentSplitter, LawChildSplitter
 from langchain_community.document_loaders import TextLoader
 from langchain_community.document_loaders.markdown import UnstructuredMarkdownLoader
 from langchain_text_splitters import MarkdownTextSplitter
@@ -164,6 +164,6 @@ def process_documents(directory_path,
 
 
 if __name__ == "__main__":
-    # chunks = load_documents_from_directory(f"{config.DATA_DIR}/ai_data")
-    chunks = process_documents(f"{config.DATA_DIR}/ai_data")
+    # 演示：切一遍法律语料（正式建库走 tools/build_law_index.py）
+    chunks = process_documents(f"{config.DATA_DIR}/law_data")
     print(chunks)

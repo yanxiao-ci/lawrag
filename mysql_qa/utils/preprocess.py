@@ -27,5 +27,5 @@ def preprocess_text(text):
 
 
 if __name__ == '__main__':
-    text = "AI大模型是什么？"
+    text = "租房押金不退怎么办？"
     print(preprocess_text(text))

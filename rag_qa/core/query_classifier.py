@@ -24,7 +24,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 1. 数据加载：读取 5000 条 JSON 数据集，包含查询和标签（“通用知识”或“专业咨询”）
 2. 模型训练：使用 bert-base-chinese 模型，微调二分类任务，准确率达 90%+
 3. 评估优化：直接处理数字标签（0 或 1），生成分类报告和混淆矩阵
-4. 预测接口：支持实时分类，集成到 EduRAG 系统。
+4. 预测接口：支持实时分类，集成到法律法规智能问答系统。
 
 为了满足以上功能，需要实现以下需求：
 1. 初始化方法：初始化预训练的分词器、 预训练的模型。 如果是在上线阶段，主要是负责加载训练好的模型
@@ -272,22 +272,21 @@ class QueryClassifier:
 # 测试
 if __name__ == "__main__":
     # 初始化分类器
-    classifier = QueryClassifier(model_path=config.MODELS_DIR + "/bert_query_classifier1")
+    classifier = QueryClassifier(model_path=config.MODELS_DIR + "/bert_query_classifier_law")
 
     # 训练模型
-    # classifier.train_model(data_file='../classify_data/model_generic_5000.json')
+    # classifier.train_model(data_file='../classify_data/model_law_5000.json')
 
     # 示例预测
     test_queries = [
-        "AI学科的课程大纲是什么",
-        "JAVA课程费用多少？",
+        "《民法典》第一千零六十二条讲什么？",
+        "劳动合同到期不续签有补偿吗？",
+        "买到假货可以要求几倍赔偿？",
+        "租房押金不退怎么办？",
         "5*9等于多少？",
-        "AI培训有哪些老师？",
-        "AI Coding 会讲吗？",
-        "Milvus 和 Zilliz Cloud 的优缺点。",
-        "学了大模型工资能用一万五吗?",
-        "deepseek是大肥鱼吗?",
-        "AI时代程序员怎么存活"
+        "今天天气怎么样？",
+        "帮我写一段 Python 排序代码",
+        "deepseek是大肥鱼吗?"
     ]
     for query in test_queries:
         category = classifier.predict_category(query)

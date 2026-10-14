@@ -7,7 +7,7 @@ import os
 # 导入配置类
 from base.config import config
 
-def setup_logger(logger_name='EduRAG', logger_file=config.LOG_FILE):
+def setup_logger(logger_name='LawRAG', logger_file=config.LOG_FILE):
     # 1. 确保日志目录存在，不存在创建
     # logger_file 是日志的文件名，所以我们先取到它所在的目录 os.path.path
     dirname = os.path.dirname(logger_file)
@@ -44,7 +44,7 @@ def setup_logger(logger_name='EduRAG', logger_file=config.LOG_FILE):
 
 
 # 创建日志记录器
-logger = setup_logger('EduRAG')
+logger = setup_logger('LawRAG')
 
 
 # 测试

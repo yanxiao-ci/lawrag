@@ -18,7 +18,7 @@ import hashlib
 import torch
 
 
-# 第三召回源：jpkb 的 20,000 条法律问答单独放一个集合，不混进法条集合
+# 第三召回源：law_faq 的 20,000 条法律问答单独放一个集合，不混进法条集合
 # （法条集合的检索强制 status == "有效"，FAQ 条目没有 status，混进去会被过滤掉）
 FAQ_COLLECTION_NAME = "lawfaq"
 
@@ -87,7 +87,7 @@ class VectorStore:
             schema.add_field(field_name="parent_id", datatype=DataType.VARCHAR, max_length=100)
             # 添加父块内容字段，VARCHAR 类型，最大长度 65535
             schema.add_field(field_name="parent_content", datatype=DataType.VARCHAR, max_length=65535)
-            # 添加学科类别字段，VARCHAR 类型，最大长度 50
+            # 添加来源字段 source（当前只有 law），VARCHAR 类型，最大长度 50
             schema.add_field(field_name="source", datatype=DataType.VARCHAR, max_length=50)
             # 添加时间戳字段，VARCHAR 类型，最大长度 50
             schema.add_field(field_name="timestamp", datatype=DataType.VARCHAR, max_length=50)
@@ -143,7 +143,7 @@ class VectorStore:
         schema.add_field(field_name="sparse_vector", datatype=DataType.SPARSE_FLOAT_VECTOR)
         schema.add_field(field_name="question", datatype=DataType.VARCHAR, max_length=2000)
         schema.add_field(field_name="answer", datatype=DataType.VARCHAR, max_length=65535)
-        schema.add_field(field_name="subject_name", datatype=DataType.VARCHAR, max_length=50)
+        schema.add_field(field_name="domain", datatype=DataType.VARCHAR, max_length=50)
         schema.add_field(field_name="source", datatype=DataType.VARCHAR, max_length=50)
         index_params = self.client.prepare_index_params()
         index_params.add_index(field_name="dense_vector", index_name="faq_dense_index",
@@ -156,9 +156,9 @@ class VectorStore:
         self.client.load_collection(FAQ_COLLECTION_NAME)
         logger.info(f"已创建空问答集合 {FAQ_COLLECTION_NAME}（用 tools/build_lawfaq_index.py 灌数据）")
 
-    # 定义方法：把 jpkb 的问答写进问答集合（供建索引脚本调用，分批向量化）
+    # 定义方法：把 law_faq 的问答写进问答集合（供建索引脚本调用，分批向量化）
     def add_faq_documents(self, records, batch_size=256):
-        """records: [{'question':..,'answer':..,'subject_name':..}, ...]"""
+        """records: [{'question':..,'answer':..,'domain':..}, ...]"""
         total = 0
         for start in range(0, len(records), batch_size):
             batch = records[start:start + batch_size]
@@ -176,7 +176,7 @@ class VectorStore:
                     "sparse_vector": {int(j): float(v) for j, v in zip(indices, row.data)},
                     "question": rec["question"][:2000],
                     "answer": rec["answer"][:20000],
-                    "subject_name": (rec.get("subject_name") or "")[:50],
+                    "domain": (rec.get("domain") or "")[:50],
                     "source": "faq",
                 })
             self.client.upsert(collection_name=FAQ_COLLECTION_NAME, data=data)
@@ -204,7 +204,7 @@ class VectorStore:
         hits = self.client.hybrid_search(
             collection_name=FAQ_COLLECTION_NAME, reqs=reqs,
             ranker=WeightedRanker(1.0, 0.7), limit=k,
-            output_fields=["text", "question", "answer", "subject_name", "source"],
+            output_fields=["text", "question", "answer", "domain", "source"],
         )[0]
         docs = []
         for hit in hits:
@@ -213,7 +213,7 @@ class VectorStore:
                 "source": e.get("source", "faq"),
                 "question": e.get("question", ""),
                 "answer": e.get("answer", ""),
-                "subject_name": e.get("subject_name", ""),
+                "domain": e.get("domain", ""),
                 "score": hit.get("distance"),
             }))
         return docs
@@ -294,7 +294,7 @@ class VectorStore:
         indices = row.col if hasattr(row, 'col') else row.indices
         for idx, value in zip(indices, row.data):
             sparse_vector[int(idx)] = float(value)
-        # 构建查询条件：学科（source）过滤 + P1 时效过滤
+        # 构建查询条件：来源（source）过滤 + P1 时效过滤
         # 法律语料另加 status == "有效"：知识库里同时留了历史版本用于对照，
         # 但检索（在线问答）只应该命中现行有效版本，避免答出已修订/已废止条文。
         filter_parts = []
@@ -398,7 +398,7 @@ class VectorStore:
 if __name__ == '__main__':
     vector_store = VectorStore()
     # from document_processor import process_documents
-    # docs = process_documents(config.DATA_DIR + "/ai_data")
+    # docs = process_documents(config.DATA_DIR + "/law_data")
     # vector_store.add_documents(docs)
 
-    vector_store.hybrid_search_with_rerank(query="语⾔模型发展⾛过了哪三个阶段?", k=5, source_filter='ai')
+    vector_store.hybrid_search_with_rerank(query="租房押金不退怎么办？", k=5, source_filter='law')

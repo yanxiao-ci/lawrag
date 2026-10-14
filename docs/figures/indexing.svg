@@ -86,8 +86,8 @@
 <text x="240.0" y="721.6" font-size="13" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">20,000 条法律问答</text>
 <path d="M 450.0 685.0 A 170.0 15.0 0 0 1 790.0 685.0 L 790.0 741.0 A 170.0 15.0 0 0 1 450.0 741.0 Z" fill="#f3e8ff" stroke="#7c3aed" stroke-width="2.0"/>
 <ellipse cx="620.0" cy="685.0" rx="170.0" ry="15.0" fill="none" stroke="#7c3aed" stroke-width="2.0"/>
-<text x="620.0" y="712.7" font-size="13" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">MySQL 表 jpkb</text>
-<text x="620.0" y="729.8" font-size="13" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">subject_name · question · answer</text>
+<text x="620.0" y="712.7" font-size="13" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">MySQL 表 law_faq</text>
+<text x="620.0" y="729.8" font-size="13" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">domain · question · answer</text>
 <path d="M 830.0 685.0 A 170.0 15.0 0 0 1 1170.0 685.0 L 1170.0 741.0 A 170.0 15.0 0 0 1 830.0 741.0 Z" fill="#f3e8ff" stroke="#7c3aed" stroke-width="2.0"/>
 <ellipse cx="1000.0" cy="685.0" rx="170.0" ry="15.0" fill="none" stroke="#7c3aed" stroke-width="2.0"/>
 <text x="1000.0" y="713.3" font-size="12" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">Redis 问题列表</text>
@@ -96,7 +96,7 @@
 <text x="1470.0" y="705.1" font-size="12" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">BM25Okapi 双索引（法条正文 + 问答问题）</text>
 <text x="1470.0" y="720.9" font-size="12" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">门控：词集合 Jaccard ≥ 0.85 / 查询词覆盖率 ≥ 0.85</text>
 <polygon points="94.0,798.0 410.0,798.0 386.0,884.0 70.0,884.0" fill="#fff1e6" stroke="#e2650a" stroke-width="2.0" stroke-linejoin="round"/>
-<text x="240.0" y="832.4" font-size="13" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">jpkb 20,000 条</text>
+<text x="240.0" y="832.4" font-size="13" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">law_faq 20,000 条</text>
 <text x="240.0" y="849.6" font-size="13" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">（问题 + 答案）</text>
 <rect x="450.0" y="798.0" width="340.0" height="86.0" rx="9" ry="9" fill="#eef4ff" stroke="#3b6fd4" stroke-width="2.0"/>
 <text x="620.0" y="841.0" font-size="13" font-weight="normal" fill="#1e293b" text-anchor="middle" dominant-baseline="middle" font-family="Microsoft YaHei, PingFang SC, Segoe UI, sans-serif">BGE-M3 向量化</text>

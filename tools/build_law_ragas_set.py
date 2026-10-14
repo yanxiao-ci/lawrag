@@ -5,7 +5,7 @@
 来源：`laws_data_50k_test.jsonl`（法律问答，答案自带《X法》第Y条 引用）。
 筛选（沿用 sample_law_faq.py 的判据）：
   1) 答案引用的法律必须都在语料里；2) 引用的条文号必须真实存在；
-  3) 问题不在 jpkb 里（否则答案就是知识库里的同一行，等于自己考自己）；
+  3) 问题不在 law_faq 里（否则答案就是知识库里的同一行，等于自己考自己）；
   4) 按领域均衡抽。
 
 注意：还会额外统计这些问题的「BM25 快通道命中率」——2026-10-14 实测 108 条候选里
@@ -55,12 +55,12 @@ def main():
     print(f"语料：{len(corpus)} 部法律 / {total} 条法条", flush=True)
 
     mysql = MySQLClient()
-    in_jpkb = {re.sub(r"\s+", "", q[0]) for q in mysql.fetch_questions()}
-    print(f"jpkb 已有问题：{len(in_jpkb)} 条（这些要排除，否则会被快通道截走）", flush=True)
+    in_law_faq = {re.sub(r"\s+", "", q[0]) for q in mysql.fetch_questions()}
+    print(f"law_faq 已有问题：{len(in_law_faq)} 条（这些要排除，否则会被快通道截走）", flush=True)
 
     # 1) 逐行筛选，按领域入库
     pool, seen, stat = {}, set(), {"源行数": 0, "引用语料外法律": 0, "条号不存在": 0,
-                                   "已在 jpkb": 0, "重复": 0, "可用": 0}
+                                   "已在 law_faq": 0, "重复": 0, "可用": 0}
     with open(args.src, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
@@ -88,8 +88,8 @@ def main():
                 stat["条号不存在"] += 1
                 continue
             key = re.sub(r"\s+", "", q)
-            if key in in_jpkb:
-                stat["已在 jpkb"] += 1
+            if key in in_law_faq:
+                stat["已在 law_faq"] += 1
                 continue
             if key in seen:
                 stat["重复"] += 1

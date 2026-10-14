@@ -45,7 +45,7 @@ GREETING_PATTERNS = [
     },
     {
         "pattern": r"^(你是谁|您是谁|你叫什么|你的名字|who are you|你能做什么|你会什么)",
-        "response": "我是法律法规智能问答助手，基于 97 部法律（8544 条法条）作答。你可以直接问「《民法典》第一千零六十二条讲什么」，也可以问「买到假货怎么赔」这类实际问题，回答会标注《法律名》第 X 条。"
+        "response": "我是法律法规智能问答助手，覆盖 288 部现行法律（21,312 条法条）和 2 万条法律问答。你可以直接问「《民法典》第一千零六十二条讲什么」，也可以问「买到假货怎么赔」这类实际问题，回答会标注《法律名》第 X 条。"
     },
     {
         "pattern": r"^(在吗|在不在|有人吗|在不)",
@@ -280,7 +280,7 @@ async def health_check():
     return {"status": "healthy"}
 
 
-# 获取有效的学科类别
+# 获取可用的知识库来源（当前只有 law）
 @app.get("/api/sources")
 async def get_sources():
     return {"sources": config.VALID_SOURCES}

@@ -7,7 +7,7 @@ from rag_qa.core.query_classifier import QueryClassifier  # 导入查询分类�
 from rag_qa.core.strategy_selector import StrategySelector  # 导入策略选择器
 from rag_qa.core.citation_check import validate_citations  # 引用可验证（小改动 C）
 
-# P2：第三召回源（jpkb 法律问答）的两个参数
+# P2：第三召回源（law_faq 法律问答）的两个参数
 #   召回候选数：先粗取几条，用精排模型排序
 #   注入条数：最终最多补充几条问答进上下文（法条那条链路仍然是 CANDIDATE_M 条，不受影响）
 FAQ_RETRIEVAL_K = 3
@@ -115,7 +115,7 @@ class RAGSystem:
 
     #   定义方法，检索并合并相关文档
     def retrieve_and_merge(self, query, source_filter=None, strategy=None):  # 新增 strategy 参数
-        logger.info(f"retrieve_and_merge 开始处理查询: '{query}', 学科过滤: {source_filter}")
+        logger.info(f"retrieve_and_merge 开始处理查询: '{query}', 来源过滤: {source_filter}")
         # 如果未指定检索策略，则使用策略选择器选择
         if not strategy:
             strategy = self.strategy_selector.select_strategy(query)
@@ -146,7 +146,7 @@ class RAGSystem:
 
         final_context_docs = ranked_sub_chunks[:config.CANDIDATE_M]
 
-        # P2：第三召回源——jpkb 的 2 万条法律问答。
+        # P2：第三召回源——law_faq 的 2 万条法律问答。
         # 法条检索漏掉的条文，问答对常常能补上：实测条文覆盖率 62.5% → 81.9%。
         # 问答走单独一路召回，用同一个精排模型排序，最多补充 FAQ_INJECT_N 条；
         # 失败只记日志，不影响法条链路。
@@ -168,7 +168,7 @@ class RAGSystem:
     def generate_answer(self, query, source_filter=None, history=None):
         """生成答案，支持对话历史，限制提示长度，并支持流式输出"""
         start_time = time.time()
-        logger.info(f"generate_answer 开始处理查询: '{query}', 学科过滤: {source_filter}")
+        logger.info(f"generate_answer 开始处理查询: '{query}', 来源过滤: {source_filter}")
 
         # 验证历史格式
         if history is not None and not isinstance(history, list):
@@ -264,7 +264,7 @@ class RAGSystem:
         目的：让模型引用时能带出章节与时效说明，而不是只给一个条文号。
         """
         md = doc.metadata or {}
-        # P2：第三召回源（jpkb 问答）的抬头
+        # P2：第三召回源（law_faq 问答）的抬头
         if md.get("source") == "faq" and md.get("question"):
             return f"【命中问答】{md['question']}\n{md.get('answer', doc.page_content)}"
         body = md.get("parent_content") or doc.page_content

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-把 jpkb 的法律问答灌进 Milvus「法律问答」集合（P2 第三召回源）
+把 law_faq 的法律问答灌进 Milvus「法律问答」集合（P2 第三召回源）
 =============================================================
 为什么单独一个集合：法条集合的检索强制 `status == "有效"`（P1 加的），
 FAQ 条目没有 status，混进去会被整条过滤掉。
@@ -23,19 +23,19 @@ from rag_qa.core.vector_store import VectorStore, FAQ_COLLECTION_NAME  # noqa: E
 
 
 def main():
-    ap = argparse.ArgumentParser(description="构建 jpkb 问答向量集合")
+    ap = argparse.ArgumentParser(description="构建 law_faq 问答向量集合")
     ap.add_argument("--reset", action="store_true", help="删掉集合重建")
     ap.add_argument("--limit", type=int, default=0, help="只灌前 N 条（调试用）")
     ap.add_argument("--batch", type=int, default=256, help="向量化批大小")
     args = ap.parse_args()
 
     mysql = MySQLClient()
-    mysql.cursor.execute("SELECT subject_name, question, answer FROM jpkb")
-    records = [{"subject_name": s, "question": q, "answer": a}
+    mysql.cursor.execute("SELECT domain, question, answer FROM law_faq")
+    records = [{"domain": s, "question": q, "answer": a}
                for s, q, a in mysql.cursor.fetchall()]
     if args.limit:
         records = records[:args.limit]
-    print(f"jpkb 读出 {len(records)} 条", flush=True)
+    print(f"law_faq 读出 {len(records)} 条", flush=True)
 
     t0 = time.time()
     vs = VectorStore()          # 构造时会把空集合准备好
