@@ -46,6 +46,12 @@ parser.add_argument("--start", type=int, default=0, help="从第几条开始（�
 # 评评测并发与超时：judge 模型额度紧张/响应慢时，把 --workers 调小
 parser.add_argument("--workers", type=int, default=4, help="评测并发数（默认 4，免费额度下别调太高）")
 parser.add_argument("--timeout", type=int, default=240, help="单次调用超时秒数（默认 240）")
+# 判分模型独立于生成模型：某模型额度用尽时只换判分模型，不动生产链路配置
+parser.add_argument("--judge-model", default=config.LLM_MODEL,
+                    help="判分模型名（默认取 config.LLM_MODEL；额度用尽时换百炼上可用的新模型）")
+# 只跑部分指标（answer_relevancy 在免费额度/中文场景下不稳定，可按需关掉）
+parser.add_argument("--metrics", default="faithfulness,answer_relevancy,context_precision,context_recall",
+                    help="逗号分隔的指标名，可选 faithfulness/answer_relevancy/context_precision/context_recall")
 args = parser.parse_args()
 print(f"评测数据：{args.data}")
 
@@ -80,7 +86,7 @@ dataset = Dataset.from_dict(eval_data)
 # 3. 配置RAGAS评估环境
 # # 初始化ChatOpenAI模型，指定模型，并设置OpenAI API密钥
 llm = ChatOpenAI(
-    model_name=config.LLM_MODEL,
+    model_name=args.judge_model,
     openai_api_key=config.DASHSCOPE_API_KEY,
     openai_api_base=config.DASHSCOPE_BASE_URL,
     temperature=0.0)
@@ -91,16 +97,23 @@ embeddings = DashScopeEmbeddings(
 
 # 4. 执行评估
 # 调用evaluate函数，传入数据集、评估指标、LLM模型和嵌入模型
+METRIC_MAP = {
+    "faithfulness": faithfulness,          # 忠实度：答案是否基于上下文
+    "answer_relevancy": answer_relevancy,  # 答案相关性：答案与问题的匹配度
+    "context_precision": context_precision,# 上下文相关性：上下文是否仅包含相关信息
+    "context_recall": context_recall,      # 上下文召回率：上下文是否包含所有必要信息
+}
+metric_names = [m.strip() for m in args.metrics.split(",") if m.strip()]
+unknown = [m for m in metric_names if m not in METRIC_MAP]
+if unknown:
+    raise SystemExit(f"未知指标：{unknown}，可选：{list(METRIC_MAP)}")
+print(f"判分模型：{args.judge_model} | 指标：{metric_names} | 并发：{args.workers}", flush=True)
+
 result = evaluate(
     # 传入转换好的Dataset对象
     dataset=dataset,
     # 指定使用的评估指标列表
-    metrics=[
-        faithfulness,  # 忠实度：答案是否基于上下文
-        answer_relevancy,  # 答案相关性：答案与问题的匹配度
-        context_precision,  # 上下文相关性：上下文是否仅包含相关信息
-        context_recall  # 上下文召回率：上下文是否包含所有必要信息
-    ],
+    metrics=[METRIC_MAP[m] for m in metric_names],
     # 传入配置好的LLM模型
     llm=llm,
     # 传入配置好的嵌入模型
