@@ -39,7 +39,7 @@
 
 ## 3. 系统架构
 
-完整流程图见 `docs/RAG项目流程图说明.md`，源文件是 `docs/make_flowchart.py`，输出到 `docs/figures/`。
+完整流程图见 `docs/开发指南/RAG项目流程图说明.md`，源文件是 `docs/make_flowchart.py`，输出到 `docs/figures/`。
 
 ### 离线准备
 
@@ -306,7 +306,10 @@ python tools/eval_hr_compliance.py --split test   # test 只跑一次
 
 ## 10. 文档与约定
 
-- `docs/RAG项目流程图说明.md`：三阶段流程图和逐环节说明，含 Mermaid 源码；
+- `docs/开发指南/README.md`：开发入口、启动和自检；
+- `docs/开发指南/开发与修改指南.md`：代码结构、常见改动、守卫和排查；
+- `docs/开发指南/项目现状与指标.md`：数据规模、指标和已知限制；
+- `docs/开发指南/RAG项目流程图说明.md`：三阶段流程图和逐环节说明，含 Mermaid 源码；
 - `docs/项目概览.html`：一页式项目概览，浏览器直接打开；
 - 本文第 4～8 节：环境搭建、建库顺序、接口和评测。
 
