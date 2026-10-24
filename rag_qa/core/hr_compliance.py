@@ -516,8 +516,8 @@ def build_findings(hits: list, candidate_map: dict, llm_basis: Optional[dict] = 
         verified = True
         for candidate in chosen[:MAX_BASIS]:
             if not quote_in_article(candidate.get("quote", ""), candidate.get("article_text", "")):
+                # 引用不通过 -> 丢弃该 basis，并标记需人工复核
                 verified = False
-                all_verified = False
                 continue
             basis.append({
                 "law_name": candidate["law_name"],

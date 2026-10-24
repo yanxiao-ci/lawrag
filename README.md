@@ -16,6 +16,7 @@
 | 生成质量 | RAGAS：忠实度 **0.899**、context_precision **0.713**、context_recall **0.730**（100 条，qwen-max 判分）；语料修复前后同裁判对照 context_recall **0.625 → 0.724** |
 | 法条可追溯 | 21,312 条法条带 法律名 / 条文号 / 编章节 / 施行日 / 时效状态，回答里的条号逐条回查上下文 |
 | 时效安全 | 检索**常开** `status == "有效"` 过滤，另存 4 部历史版本作新旧对照 |
+| HR 合规检查 | 规则扫描 + 闭集取证 + quote 逐字回查；140 条 JD 评测集（30 条沿用 + 110 条模板生成）dev/test 的 P/R/F1 均为 **1.0**，引用准确率 **100%**，干净 JD 误报 **0%** |
 
 ---
 
@@ -195,7 +196,37 @@ python app.py          # 或 uvicorn app:app --host 0.0.0.0 --port 8080
 | GET | `/api/domains` | 可用领域视图（当前为 `labor`） |
 | POST | `/api/search_law` | 检索-only：给 MCP / Agent 返回条文证据，不生成长文本 |
 | POST | `/api/get_article` | 按法律名 + 条号取全文（支持 第四十三条 / 第43条 / 43 / 之一） |
+| POST | `/api/check_hr_compliance` | HR 合规检查：规则命中 + 闭集法条依据 + 风险等级 |
 | GET | `/api/corpus_info` | 语料规模、领域、覆盖边界 |
+
+`/api/check_hr_compliance` 的请求/响应：
+
+```json
+// 请求
+{"text": "招聘后端工程师，限男性，35岁以下，试用期9个月。", "scope": "jd", "domain": "labor"}
+// 响应
+{
+  "risk_level": "high",
+  "findings": [{
+    "category": "就业歧视",
+    "span": "限男性",
+    "severity": "high",
+    "suggestion": "删除性别限制，改为与岗位相关的任职资格",
+    "basis": [{"law_name": "中华人民共和国就业促进法", "article_no": "第二十七条", "quote": "……"}],
+    "needs_human": false
+  }],
+  "disclaimer": "仅覆盖全国人大及其常委会制定的法律级文本，不含行政法规、司法解释、地方规定；本结果仅作合规提示，不构成法律意见。",
+  "citation_verified": true,
+  "llm_used": true
+}
+```
+
+口径：
+- 规则只负责定位片段、类别与建议，不产生条号；条号只来自 `law_hint` 的 MySQL 回查，或严格劳动法领域检索兜底；
+- `quote` 归一化空白/全半角标点后必须是 MySQL `article_text` 的连续子串，否则丢弃该 basis 并标 `needs_human=true`；
+- LLM 只做闭集选条（5s 超时，失败回退确定性 hint），不改 span / category / severity；
+- `risk_level` 由规则 `severity` 聚合，不给 LLM；
+- 仅覆盖法律级文本（不含《女职工劳动保护特别规定》等行政法规）。
 
 ### 4.7 MCP 工具（给 Agent 调用）
 
@@ -210,7 +241,10 @@ python mcp_server/server.py streamable-http  # HTTP（部署，默认 127.0.0.1:
 > 不需要 lawrag 的 GPU 环境。想在 Claude Code 里直接用，把 `mcp_server/example.mcp.json`
 > 的 `lawrag` 段合并到项目的 `.mcp.json`。
 
-工具：`search_law` / `get_article` / `get_corpus_info`。
+工具：`search_law` / `get_article` / `check_hr_compliance` / `get_corpus_info`。
+其中 `check_hr_compliance` 的工具描述明确写明「仅覆盖法律级文本，不构成法律意见」；
+它只调 HTTP，不 import `app.py`、不加载任何模型。
+
 冒烟测试（需 lawrag 已启动，且解释器装有 `mcp`）：
 
 ```bash
@@ -245,7 +279,7 @@ lawrag/
 │  ├─ data/                   # 法律原文、分类数据、评测产物
 │  └─ rag_assessment/         # RAGAS 评测脚本
 ├─ static/index.html          # 前端页面（流式对话 + 引用展示）
-├─ mcp_server/server.py       # MCP 薄封装（search_law / get_article / get_corpus_info）
+├─ mcp_server/server.py       # MCP 薄封装（search_law / get_article / check_hr_compliance / get_corpus_info）
 ├─ tools/                     # 数据采集 / 建库 / 评测 / 调参脚本
 └─ docs/                      # 方案书、流程图与迭代记录
 ```
@@ -271,6 +305,11 @@ python tools/tune_fast_channel_gate.py
 python tools/build_law_ragas_set.py
 python tools/collect_law_ragas_answers.py --workers 8
 python rag_qa/rag_assessment/ragas_evaluate.py --data rag_qa/data/law_eval/ragas/law_ragas_answers.json --judge-model qwen-max --out rag_qa/data/law_eval/ragas/ragas_law.csv
+
+# HR 合规（规则 + 闭集取证 + 逐字回查）：先启动 app.py，再调真实端点
+python tools/build_hr_compliance_eval.py                  # 生成并逐条核对 140 条评测集
+python tools/eval_hr_compliance.py --split dev            # 调规则/Prompt 只用 dev
+python tools/eval_hr_compliance.py --split test           # test 只跑一次
 ```
 
 评测数据与结果落在 `rag_qa/data/law_eval/`（体积较大，已 gitignore，按上面的脚本可重新生成）。
@@ -282,7 +321,11 @@ python rag_qa/rag_assessment/ragas_evaluate.py --data rag_qa/data/law_eval/ragas
 - **多轮历史污染**：会话历史按「最近 5 轮」拼进提示词，跨话题追问时可能带偏检索，尚未做话题切分；
 - **引用校验**：`citation_check.py` 会核对答案引用的法条是否存在，但暂不识别「第 X 条之一」这类写法（只会漏检，不会误报）；
 - **稀疏分支**：混合检索里 BGE-M3 稀疏向量当前对 top-k 排序影响很小（见 §6 消融），保留为后续优化点；
-- **粒度**：问答与法条目前是「整条法条 / 整条问答」为最小单位，未做更细的条款拆分与表格类法条处理。
+- **粒度**：问答与法条目前是「整条法条 / 整条问答」为最小单位，未做更细的条款拆分与表格类法条处理；
+- **HR 合规只覆盖法律级**：不含行政法规、司法解释、地方规定（如《女职工劳动保护特别规定》）；公司制度类风险仍需执行层自己的规则库；
+- **规则库是召回上限**：13 条规则之外的歧视/违法表述可能漏检；命中项仍需人工复核，`needs_human` 只表示法条依据是否完成逐字回查，不代表法务结论；
+- **合规评测集构成**：30 条沿用 HRAgent 已有样本，110 条按 13 类规则与边界模板生成并逐条核对（非全部人工标注）；因此 P/R/F1=1.0 主要证明规则与取证链路一致，不能外推为开放世界准确率；
+- **LLM 闭集选条**：qwen3.6-plus 关闭思考链后单次约 1–3s；超时/解析失败自动回退确定性 hint，接口仍返回，只是 `llm_used=false`。
 
 ---
 

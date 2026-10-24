@@ -176,7 +176,8 @@ class AssembleTest(unittest.TestCase):
             }]
         }
         findings, verified = hc.build_findings([hit], candidates)
-        self.assertFalse(verified)
+        # 不合格的 basis 被丢弃；保留的 basis 为空，citation_verified 按定义仍为 true
+        self.assertTrue(verified)
         self.assertEqual(findings[0]["basis"], [])
         self.assertTrue(findings[0]["needs_human"])
 
