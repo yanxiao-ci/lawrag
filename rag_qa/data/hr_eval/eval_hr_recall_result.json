@@ -5,7 +5,7 @@
  "results": {
   "off": {
    "n": 400,
-   "seconds": 112.6,
+   "seconds": 118.5,
    "mrr": 0.7692,
    "recall@1": 0.6825,
    "recall@3": 0.865,
@@ -16,7 +16,7 @@
   },
   "soft": {
    "n": 400,
-   "seconds": 109.4,
+   "seconds": 118.1,
    "mrr": 0.8106,
    "recall@1": 0.725,
    "recall@3": 0.9075,
@@ -27,7 +27,7 @@
   },
   "strict": {
    "n": 400,
-   "seconds": 113.3,
+   "seconds": 112.4,
    "mrr": 0.8106,
    "recall@1": 0.725,
    "recall@3": 0.9075,

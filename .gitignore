@@ -26,7 +26,8 @@ __pycache__/
 # 早期文件（旧入口 / 旧前端 / 旧语料 / 旧评测集）：已归到此目录，不入库
 /_archive/
 
-# 日志（含轮转文件 app.log.1 / app.log.2）
+# 日志（含轮转文件 app.log.1 / app.log.2 与 nohup 的 .out/.err）
+/logs/
 /**/*.log
 /**/*.log.*
 
