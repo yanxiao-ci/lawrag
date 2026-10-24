@@ -1,0 +1,199 @@
+{
+  "version": "1.0",
+  "updated_at": "2026-10-24",
+  "law_scope": "labor",
+  "rules": [
+    {
+      "id": "gender_restriction",
+      "category": "就业歧视",
+      "severity": "high",
+      "patterns": [
+        "限男性",
+        "限女性",
+        "男性优先",
+        "女性优先",
+        "仅限男",
+        "仅限女"
+      ],
+      "suggestion": "删除性别限制，改为与岗位相关的任职资格",
+      "law_hint": [
+        "中华人民共和国就业促进法 第二十七条",
+        "中华人民共和国劳动法 第十二条"
+      ]
+    },
+    {
+      "id": "marital_fertility",
+      "category": "就业歧视",
+      "severity": "high",
+      "patterns": [
+        "已婚已育",
+        "已婚优先",
+        "未婚优先",
+        "婚育情况",
+        "生育计划"
+      ],
+      "suggestion": "删除婚育相关表述，不得将婚育状况作为录用条件",
+      "law_hint": [
+        "中华人民共和国妇女权益保障法 第四十三条"
+      ]
+    },
+    {
+      "id": "age_restriction",
+      "category": "就业歧视",
+      "severity": "high",
+      "patterns": [
+        "\\d{2}岁以下",
+        "\\d{2}岁以上",
+        "年龄不超过",
+        "年龄要求"
+      ],
+      "suggestion": "删除年龄限制，改为与岗位相关的能力/经验要求",
+      "law_hint": [
+        "中华人民共和国就业促进法 第二十六条"
+      ]
+    },
+    {
+      "id": "hukou_restriction",
+      "category": "就业歧视",
+      "severity": "high",
+      "patterns": [
+        "本地户口",
+        "本市户口",
+        "户籍限制",
+        "仅限本地"
+      ],
+      "suggestion": "删除户籍限制",
+      "law_hint": [
+        "中华人民共和国就业促进法 第二十六条"
+      ]
+    },
+    {
+      "id": "ethnicity_religion",
+      "category": "就业歧视",
+      "severity": "high",
+      "patterns": [
+        "民族",
+        "宗教",
+        "信仰"
+      ],
+      "suggestion": "删除民族/宗教信仰相关限制",
+      "law_hint": [
+        "中华人民共和国就业促进法 第三条"
+      ]
+    },
+    {
+      "id": "health_disability",
+      "category": "就业歧视",
+      "severity": "high",
+      "patterns": [
+        "无残疾",
+        "身体健康",
+        "无传染病",
+        "乙肝"
+      ],
+      "suggestion": "删除与岗位无关的健康/残疾限制；必要体检项需与岗位直接相关",
+      "law_hint": [
+        "中华人民共和国残疾人保障法 第三十八条",
+        "中华人民共和国就业促进法 第二十九条"
+      ]
+    },
+    {
+      "id": "height_appearance",
+      "category": "就业歧视",
+      "severity": "high",
+      "patterns": [
+        "身高",
+        "体重",
+        "形象气质佳",
+        "五官端正"
+      ],
+      "suggestion": "删除身高/体重/外貌要求，除非能证明与岗位职责直接相关",
+      "law_hint": [
+        "中华人民共和国就业促进法 第二十六条"
+      ]
+    },
+    {
+      "id": "illegal_probation",
+      "category": "违法条款",
+      "severity": "high",
+      "patterns": [
+        "试用期.{0,6}([7-9]|[1-9]\\d)个月",
+        "试用期超过"
+      ],
+      "suggestion": "试用期不得超过法定上限（劳动合同法第十九条）",
+      "law_hint": [
+        "中华人民共和国劳动合同法 第十九条"
+      ]
+    },
+    {
+      "id": "no_social_insurance",
+      "category": "违法条款",
+      "severity": "high",
+      "patterns": [
+        "不缴社保",
+        "不缴纳社保",
+        "社保自理",
+        "自愿放弃社保"
+      ],
+      "suggestion": "依法为员工缴纳社会保险，不得约定放弃",
+      "law_hint": [
+        "中华人民共和国社会保险法 第五十八条"
+      ]
+    },
+    {
+      "id": "deposit_id",
+      "category": "违法条款",
+      "severity": "high",
+      "patterns": [
+        "押金",
+        "保证金",
+        "扣押身份证"
+      ],
+      "suggestion": "不得收取押金/保证金或扣押身份证件",
+      "law_hint": [
+        "中华人民共和国劳动合同法 第九条"
+      ]
+    },
+    {
+      "id": "illegal_hours",
+      "category": "违法条款",
+      "severity": "medium",
+      "patterns": [
+        "996",
+        "大小周",
+        "单休",
+        "每月休息[1-4]天"
+      ],
+      "suggestion": "工时安排需符合法定工时与休息休假规定",
+      "law_hint": [
+        "中华人民共和国劳动法 第三十六条",
+        "中华人民共和国劳动法 第三十八条"
+      ]
+    },
+    {
+      "id": "false_promise",
+      "category": "虚假承诺",
+      "severity": "medium",
+      "patterns": [
+        "包就业",
+        "保证录用",
+        "百分百入职"
+      ],
+      "suggestion": "删除无法保证的承诺性表述",
+      "law_hint": [
+        "中华人民共和国广告法 第二十八条"
+      ]
+    },
+    {
+      "id": "salary_vague",
+      "category": "表述不清",
+      "severity": "medium",
+      "patterns": [
+        "薪资面议",
+        "工资面议"
+      ],
+      "suggestion": "建议给出薪资区间，减少候选人误解与后续争议",
+      "law_hint": []
+    }
+  ]
+}
