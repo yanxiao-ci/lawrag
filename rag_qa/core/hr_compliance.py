@@ -423,6 +423,9 @@ class LLMSelector:
                 model=self.model,
                 messages=messages,
                 temperature=0,
+                max_tokens=800,
+                # qwen3.x 默认开思考链；闭集选条是短 JSON 任务，关掉思考把延迟压到 1-2s
+                extra_body={"enable_thinking": False},
                 response_format={"type": "json_object"},
             )
             return response.choices[0].message.content or ""
@@ -435,6 +438,8 @@ class LLMSelector:
                 model=self.model,
                 messages=messages,
                 temperature=0,
+                max_tokens=800,
+                extra_body={"enable_thinking": False},
                 timeout=remaining,
             )
             return response.choices[0].message.content or ""
@@ -547,7 +552,8 @@ def analyze_compliance(
 
     llm_used = False
     llm_basis: dict = {}
-    if llm is not None and hits:
+    # 候选集全空时 LLM 无从选择，跳过调用（省延迟，也让 salary_vague 走确定性路径）
+    if llm is not None and hits and any(candidate_map.values()):
         parsed = llm.select(masked_text, hits, candidate_map)
         if parsed is not None:
             llm_used = True

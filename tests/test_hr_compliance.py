@@ -226,6 +226,58 @@ class LlmParsingTest(unittest.TestCase):
         self.assertEqual(selected["gender_restriction"][0]["article_no"], "第二十七条")
 
 
+class CandidateCollectionTest(unittest.TestCase):
+    def test_hint_resolves_without_retrieval(self):
+        calls = []
+
+        def fetch(law_name, article_no):
+            calls.append((law_name, article_no))
+            return {"law_name": law_name, "article_no": article_no,
+                    "article_text": "用人单位招用人员，不得以性别为由拒绝录用妇女。"}
+
+        def retrieve(query, k):
+            raise AssertionError("hint 已命中，不应触发检索兜底")
+
+        hit = {
+            "rule_id": "gender_restriction",
+            "span": "限男性",
+            "law_hints": ["中华人民共和国就业促进法 第二十七条"],
+        }
+        result = hc.collect_candidates([hit], fetch_article=fetch, retrieve=retrieve)
+        self.assertEqual(len(result["gender_restriction"]), 1)
+        self.assertEqual(calls, [("中华人民共和国就业促进法", "第二十七条")])
+
+    def test_retrieval_fallback_when_hint_missing(self):
+        class Doc:
+            def __init__(self, law_name, article_no):
+                self.metadata = {"law_name": law_name, "article_no": article_no}
+
+        def fetch(law_name, article_no):
+            if article_no == "第九十九条":
+                return None
+            return {"law_name": law_name, "article_no": article_no,
+                    "article_text": "劳动者享有平等就业和选择职业的权利。"}
+
+        def retrieve(query, k):
+            return [Doc("中华人民共和国劳动法", "第三条")]
+
+        hit = {
+            "rule_id": "age_restriction",
+            "span": "35岁以下",
+            "law_hints": ["中华人民共和国就业促进法 第九十九条"],
+        }
+        result = hc.collect_candidates([hit], fetch_article=fetch, retrieve=retrieve)
+        self.assertEqual([c["article_no"] for c in result["age_restriction"]], ["第三条"])
+
+    def test_no_hint_no_retrieval(self):
+        def retrieve(query, k):
+            raise AssertionError("无 hint 的规则不应检索兜底")
+
+        hit = {"rule_id": "salary_vague", "span": "薪资面议", "law_hints": []}
+        result = hc.collect_candidates([hit], fetch_article=lambda *a: None, retrieve=retrieve)
+        self.assertEqual(result["salary_vague"], [])
+
+
 class AnalyzeFallbackTest(unittest.TestCase):
     def test_llm_failure_falls_back_to_hint(self):
         article = "用人单位招用人员，不得以性别为由拒绝录用妇女。"

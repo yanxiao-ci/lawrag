@@ -43,6 +43,8 @@ async def main():
                 ("get_corpus_info", {}),
                 ("search_law", {"query": "试用期最长多久", "top_k": 3, "domain": "labor"}),
                 ("get_article", {"law_name": "中华人民共和国妇女权益保障法", "article_no": "第43条"}),
+                ("check_hr_compliance",
+                 {"text": "招聘后端工程师，限男性，35岁以下，试用期9个月。", "scope": "jd"}),
             ]
             for name, args in cases:
                 print(f"\n===== {name} =====", flush=True)

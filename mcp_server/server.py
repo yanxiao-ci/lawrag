@@ -6,9 +6,10 @@ lawrag MCP 薄封装
 不 import app.py，不加载 BGE-M3 / Reranker / BERT，避免和 FastAPI 进程重复占 GPU。
 
 工具（与方案契约一致）：
-  - search_law       检索条文，只返回证据，不生成长文本
-  - get_article      按法律名 + 条号取全文（支持 第四十三条 / 第43条 / 43 / 之一）
-  - get_corpus_info  语料规模、领域、覆盖边界
+  - search_law          检索条文，只返回证据，不生成长文本
+  - get_article         按法律名 + 条号取全文（支持 第四十三条 / 第43条 / 43 / 之一）
+  - check_hr_compliance HR 合规检查：规则命中 + 闭集法条依据 + 风险等级
+  - get_corpus_info     语料规模、领域、覆盖边界
 
 传输：
   python mcp_server/server.py                 # stdio（开发 / Claude Code）
@@ -79,6 +80,24 @@ def get_article(law_name: str, article_no: str) -> dict:
     return _request("POST", "/api/get_article", {
         "law_name": law_name,
         "article_no": article_no,
+    })
+
+
+@mcp.tool()
+def check_hr_compliance(text: str, scope: str = "jd") -> dict:
+    """HR 合规检查：返回结构化风险项、闭集法条依据和风险等级。
+
+    仅覆盖全国人大及其常委会制定的法律级文本，不含行政法规、司法解释、地方规定；
+    本结果仅作合规提示，不构成法律意见。
+
+    Args:
+        text: JD 或简历筛选文本（服务端会做 PII 兜底脱敏）
+        scope: "jd"（默认）或 "resume_screening"
+    """
+    return _request("POST", "/api/check_hr_compliance", {
+        "text": text,
+        "scope": scope,
+        "domain": "labor",
     })
 
 

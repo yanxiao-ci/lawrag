@@ -11,7 +11,7 @@ from pydantic import BaseModel
 import asyncio
 import json
 import uuid
-from typing import Optional
+from typing import List, Optional
 import time
 import re
 import threading
@@ -19,7 +19,9 @@ from datetime import date
 
 from base.config import config
 from base.domains import list_domains, law_names_for
+from base.logger import logger
 from mysql_qa.db.mysql_client import MySQLClient
+from rag_qa.core import hr_compliance
 # 导入现有的系统
 from new_main import IntegratedQASystem
 
@@ -97,6 +99,40 @@ class SearchLawRequest(BaseModel):
 class GetArticleRequest(BaseModel):
     law_name: str
     article_no: str
+
+
+# HR 合规检查（Stage 3）：输入 JD / 简历筛选文本，输出风险项 + 闭集法条依据
+class CheckHRComplianceRequest(BaseModel):
+    text: str
+    scope: Optional[str] = "jd"
+    domain: Optional[str] = "labor"
+
+
+class HRComplianceBasis(BaseModel):
+    law_name: str
+    article_no: str
+    quote: str
+
+
+class HRComplianceFinding(BaseModel):
+    category: str
+    span: str
+    severity: str
+    suggestion: str
+    basis: List[HRComplianceBasis] = []
+    needs_human: bool
+
+
+class CheckHRComplianceResponse(BaseModel):
+    risk_level: str
+    findings: List[HRComplianceFinding]
+    disclaimer: str
+    citation_verified: bool
+    llm_used: bool
+
+
+# 闭集选条器：只在有候选法条时调用；失败自动回退到确定性 hint
+hr_llm_selector = hr_compliance.LLMSelector(timeout=5.0)
 
 
 # 添加静态文件服务
@@ -395,6 +431,61 @@ def get_corpus_info():
         "domains": list_domains(),
         "coverage_note": "仅覆盖全国人大及其常委会制定的法律级文本；不含行政法规、司法解释、地方规定。",
     }
+
+
+# HR 合规检查：规则扫描 + 法条取证 + 逐字回查 + LLM 闭集选条
+# 用 sync def：FastAPI 会放到线程池执行，避免阻塞 WebSocket / 对话链路的事件循环
+@app.post("/api/check_hr_compliance", response_model=CheckHRComplianceResponse)
+def check_hr_compliance(request: CheckHRComplianceRequest):
+    request_id = uuid.uuid4().hex[:12]
+    started = time.time()
+
+    text = (request.text or "").strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="text 不能为空")
+
+    scope = (request.scope or "jd").strip()
+    if scope not in hr_compliance.VALID_SCOPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"scope 必须是 {' / '.join(hr_compliance.VALID_SCOPES)}")
+
+    # 领域只用于检索兜底的严格过滤；law_hint 不受 domain 限制
+    domain = (request.domain or "labor").strip()
+    law_names = law_names_for(domain)
+    if not law_names:
+        raise HTTPException(status_code=404, detail=f"未知领域: {domain}")
+
+    def fetch_article(law_name: str, article_no: str):
+        """确定性 hint 回查：直接按法律名 + 条号，不走领域过滤。"""
+        with tool_db_lock:
+            return tool_db.find_law_article_detail_flexible(law_name, article_no)
+
+    def retrieve(query: str, k: int):
+        """检索兜底：只走 strict 领域（law_names），不注入 FAQ。"""
+        with tool_search_lock:
+            return qa_system.vector_store.search_children(
+                query, k=k, source_filter="law", effective_only=True,
+                law_names=law_names, with_score=True)
+
+    try:
+        result = hr_compliance.analyze_compliance(
+            text,
+            scope=scope,
+            fetch_article=fetch_article,
+            retrieve=retrieve,
+            llm=hr_llm_selector,
+        )
+    except Exception as e:
+        logger.error(f"HR合规检查失败 request_id={request_id} error={type(e).__name__}")
+        raise HTTPException(status_code=500, detail="合规检查失败，请稍后重试")
+
+    elapsed = time.time() - started
+    logger.info(
+        f"HR合规检查 request_id={request_id} scope={scope} domain={domain} "
+        f"elapsed={elapsed:.2f}s findings={len(result['findings'])} "
+        f"llm_used={result['llm_used']} citation_verified={result['citation_verified']}")
+    return result
 
 
 if __name__ == "__main__":
