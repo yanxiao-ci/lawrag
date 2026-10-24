@@ -18,12 +18,17 @@ __pycache__/
 
 # 语料扩容时自动生成的旧语料备份（不入库）
 /rag_qa/data/_backup_law_data_*/
+/rag_qa/data/_backup_law_meta_*.json
+
+# RAGAS 生成产物（体积大、可复算；只保留检索集与结果 JSON）
+/rag_qa/data/hr_eval/ragas/
 
 # 早期文件（旧入口 / 旧前端 / 旧语料 / 旧评测集）：已归到此目录，不入库
 /_archive/
 
-# 日志
+# 日志（含轮转文件 app.log.1 / app.log.2）
 /**/*.log
+/**/*.log.*
 
 # 本地环境变量（含 API Key，禁止入库）
 .env
