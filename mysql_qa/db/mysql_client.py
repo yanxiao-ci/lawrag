@@ -189,6 +189,43 @@ class MySQLClient:
             logger.error(f"法条精确查询(详细)失败: {e}")
             return None
 
+    # 工具接口：条号容错查询（第四十三条 / 第43条 / 43 / 第四十三条之一）
+    def find_law_article_detail_flexible(self, law_name, article_no):
+        import re
+        from base.law_parser import cn2int
+
+        s = (article_no or "").strip()
+        m = re.match(r"^第?([0-9〇零一二三四五六七八九十百千万两]+)条?"
+                     r"(?:之([0-9〇零一二三四五六七八九十百千两]+))?$", s)
+        if not m:
+            return self.find_law_article_detail(law_name, article_no)
+        num = cn2int(m.group(1))
+        sub = cn2int(m.group(2)) if m.group(2) else None
+        if num is None:
+            return self.find_law_article_detail(law_name, article_no)
+        try:
+            self.cursor.execute(
+                "SELECT law_name, article_no, article_text, chapter, publish_date, effective_date, status "
+                "FROM law_articles "
+                "WHERE REPLACE(law_name, '中华人民共和国', '')=%s AND article_num=%s "
+                "ORDER BY (status='有效') DESC, publish_date DESC",
+                ((law_name or '').replace('中华人民共和国', ''), num))
+            rows = self.cursor.fetchall()
+        except pymysql.MySQLError as e:
+            logger.error(f"法条容错查询失败: {e}")
+            return None
+        for row in rows:
+            suffix = row[1].split("之", 1)[1] if "之" in row[1] else None
+            if sub is None and suffix is None:
+                return {"law_name": row[0], "article_no": row[1], "article_text": row[2],
+                        "chapter": row[3], "publish_date": row[4],
+                        "effective_date": row[5], "status": row[6]}
+            if sub is not None and suffix is not None and cn2int(suffix) == sub:
+                return {"law_name": row[0], "article_no": row[1], "article_text": row[2],
+                        "chapter": row[3], "publish_date": row[4],
+                        "effective_date": row[5], "status": row[6]}
+        return None
+
     # P1：查某部法律在库里的历史版本（用于「该条另有历史版本」的提示）
     def list_law_versions(self, law_name):
         base = (law_name or '').replace('中华人民共和国', '')

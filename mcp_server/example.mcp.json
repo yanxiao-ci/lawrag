@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "lawrag": {
+      "command": "D:/software/Anaconda/envs/edu_agent/python.exe",
+      "args": ["D:/Python-Project/lawrag/mcp_server/server.py"],
+      "env": {
+        "LAWRAG_BASE_URL": "http://127.0.0.1:8080"
+      }
+    }
+  }
+}

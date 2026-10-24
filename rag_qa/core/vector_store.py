@@ -3,6 +3,7 @@
 """
 from base.config import config
 from base.logger import logger
+import json
 import os
 # 导入 BGE-M3 嵌入函数，用于生成文档和查询的向量表示
 from milvus_model.hybrid import BGEM3EmbeddingFunction
@@ -186,7 +187,7 @@ class VectorStore:
         return total
 
     # 定义方法：在问答集合里召回（第三召回源，稠密 + 稀疏混合检索）
-    def search_faq(self, query, k=3):
+    def search_faq(self, query, k=3, domain=None):
         if not self.client.has_collection(FAQ_COLLECTION_NAME):
             logger.warning(f"问答集合不存在: {FAQ_COLLECTION_NAME}，跳过 FAQ 召回")
             return []
@@ -195,12 +196,15 @@ class VectorStore:
         row = embeddings["sparse"][0]
         indices = row.col if hasattr(row, "col") else row.indices
         sparse_vector = {int(i): float(v) for i, v in zip(indices, row.data)}
-        reqs = [
-            AnnSearchRequest(data=[dense_vector], anns_field="dense_vector",
-                             param={"metric_type": "IP", "params": {"nprobe": 10}}, limit=k),
-            AnnSearchRequest(data=[sparse_vector], anns_field="sparse_vector",
-                             param={"metric_type": "IP", "params": {}}, limit=k),
-        ]
+        dense_kwargs = dict(data=[dense_vector], anns_field="dense_vector",
+                            param={"metric_type": "IP", "params": {"nprobe": 10}}, limit=k)
+        sparse_kwargs = dict(data=[sparse_vector], anns_field="sparse_vector",
+                             param={"metric_type": "IP", "params": {}}, limit=k)
+        if domain:
+            expr = f"domain == {json.dumps(domain, ensure_ascii=False)}"
+            dense_kwargs["expr"] = expr
+            sparse_kwargs["expr"] = expr
+        reqs = [AnnSearchRequest(**dense_kwargs), AnnSearchRequest(**sparse_kwargs)]
         hits = self.client.hybrid_search(
             collection_name=FAQ_COLLECTION_NAME, reqs=reqs,
             ranker=WeightedRanker(1.0, 0.7), limit=k,
@@ -277,7 +281,7 @@ class VectorStore:
 
     # 定义方法：混合检索（粗排），返回 top-k 子块 Document；评测 Recall@k 直接复用
     def search_children(self, query, k=config.RETRIEVAL_K, source_filter=None,
-                        effective_only=True, use_sparse=True):
+                        effective_only=True, use_sparse=True, law_names=None, with_score=False):
         """混合检索（粗排），返回 top-k 子块 Document。
 
         effective_only / use_sparse 是给评测做消融用的开关，默认值等于线上行为：
@@ -306,6 +310,10 @@ class VectorStore:
         # 本集合目前只有法律语料（21565 条 source 全为 law），所以直接常开。
         if effective_only:
             filter_parts.append('status == "有效"')
+        # 领域视图：用已有的 law_name 标量字段做 in 过滤，不新增字段、不重建索引
+        if law_names:
+            quoted = ", ".join(json.dumps(n, ensure_ascii=False) for n in law_names)
+            filter_parts.append(f"law_name in [{quoted}]")
         fileter_expr = " and ".join(filter_parts)
         # 构建查询条件
         dense_request = AnnSearchRequest(
@@ -339,13 +347,24 @@ class VectorStore:
         if not results:
             return []
         # 将结果转换为Document列表
-        return [self._doc_from_hit(hit['entity']) for hit in results]
+        docs = [self._doc_from_hit(hit['entity']) for hit in results]
+        if with_score:
+            # 工具接口要返回检索分数；评测/线上链路默认不带，行为不变
+            for doc, hit in zip(docs, results):
+                try:
+                    doc.metadata["score"] = float(hit.get("distance"))
+                except (TypeError, ValueError):
+                    doc.metadata["score"] = None
+        return docs
 
     #定义方法，执行混合检索并重排序
-    def hybrid_search_with_rerank(self, query, k=config.RETRIEVAL_K, source_filter=None):
-        logger.info(f"hybrid_search_with_rerank 执行混合检索并重排序...query:{query}, k:{k}, source_filter:{source_filter}")
+    def hybrid_search_with_rerank(self, query, k=config.RETRIEVAL_K, source_filter=None,
+                                  law_names=None):
+        logger.info(f"hybrid_search_with_rerank 执行混合检索并重排序...query:{query}, k:{k}, "
+                    f"source_filter:{source_filter}, law_names:{len(law_names) if law_names else 0}")
         # 混合检索（粗排）
-        child_chunks = self.search_children(query, k=k, source_filter=source_filter)
+        child_chunks = self.search_children(query, k=k, source_filter=source_filter,
+                                            law_names=law_names)
         if not child_chunks:
             return []
         logger.info(f"去重前子(父)块数量:{len(child_chunks)}")

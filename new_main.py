@@ -209,10 +209,15 @@ class IntegratedQASystem:
         return answer
 
     # 问答查询
-    def query(self, query, source_filter=None, session_id=None):
-        """查询集成系统，支持对话历史和流式输出"""
+    def query(self, query, source_filter=None, session_id=None,
+              domain=None, domain_mode="off", allow_faq=True):
+        """查询集成系统，支持对话历史、领域视图和流式输出。
+
+        注意：问候语、条文号精确路由、BM25 快通道不做领域过滤；
+        它们都是确定性/词面命中，领域过滤只作用于 RAG 检索链路。
+        """
         start_time = time.time()
-        logger.info(f"处理查询: '{query}' (会话ID: {session_id})")
+        logger.info(f"处理查询: '{query}' (会话ID: {session_id}, 领域: {domain}, 模式: {domain_mode})")
         # 获取会话历史
 
         #上下文token有限,所以限制五轮
@@ -241,7 +246,9 @@ class IntegratedQASystem:
             # 收集完整答案以便存储
             collected_answer = ""
             # 从RAG系统获取流式输出
-            for token in self.rag_system.generate_answer(query, source_filter=source_filter, history=history):
+            for token in self.rag_system.generate_answer(
+                    query, source_filter=source_filter, history=history,
+                    domain=domain, domain_mode=domain_mode, allow_faq=allow_faq):
                 collected_answer += token
                 yield token, False  # 第二个参数表示这是部分答案
 

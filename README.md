@@ -11,9 +11,9 @@
 | 亮点 | 结果 |
 | --- | --- |
 | 快通道门控 | 换成词面判据后**错误抢答 54 → 0**；真实法律问题进 RAG **10% → 99%**；库内原句 **200/200** 仍秒回 |
-| 双路召回 + 精排 | 法条块 2 条 + 问答块 2 条；参考条文覆盖率 **65% → 75%**，兜底拒答率 **24% → 5%** |
-| 检索质量 | Recall@5 **0.824**，线上链路 MRR 0.7188（1000 条样本 + 四组消融） |
-| 生成质量 | RAGAS 忠实度 **0.899**；同裁判对照上下文召回 **0.32 → 0.61**（100 条领域均衡评测集） |
+| 双路召回 + 精排 | 法条块 2 条 + 问答块 2 条；参考条文覆盖率 **65% → 78.75%**，兜底拒答率 **24% → 5%** |
+| 检索质量 | Recall@5 **0.901**，线上链路 MRR **0.7919**（1000 条样本 + 四组消融；语料修复后重基线） |
+| 生成质量 | RAGAS：忠实度 **0.899**、context_precision **0.713**、context_recall **0.730**（100 条，qwen-max 判分）；语料修复前后同裁判对照 context_recall **0.625 → 0.724** |
 | 法条可追溯 | 21,312 条法条带 法律名 / 条文号 / 编章节 / 施行日 / 时效状态，回答里的条号逐条回查上下文 |
 | 时效安全 | 检索**常开** `status == "有效"` 过滤，另存 4 部历史版本作新旧对照 |
 
@@ -40,7 +40,7 @@
 | --- | --- | --- |
 | 法律原文（.txt） | `rag_qa/data/law_data/` | **292 个文件 / 4.2 MB**（288 部现行 + 4 个历史版本） |
 | 法条表 | MySQL `law_articles` | **21,565 条**（现行有效 21,312 + 历史版本 253） |
-| 法条向量 | Milvus `lawrag`（子块 = 单条法条，父块 = 同法连续 5 条） | **55,847 个子块** |
+| 法条向量 | Milvus `lawrag`（子块 = 单条法条，父块 = 同法连续 5 条） | **21,565 个子块**（父块内容随子块 metadata；实测行数） |
 | 法律问答 | MySQL `law_faq` / `mysql_qa/data/law_qa.csv` | **20,000 条** |
 | 问答向量 | Milvus `lawfaq`（第三召回源） | **20,000 条** |
 
@@ -192,6 +192,39 @@ python app.py          # 或 uvicorn app:app --host 0.0.0.0 --port 8080
 | GET/DELETE | `/api/history/{session_id}` | 查询 / 清空会话历史 |
 | GET | `/health` | 存活检查 |
 | GET | `/api/sources` | 可用知识库来源（当前为 `["law"]`） |
+| GET | `/api/domains` | 可用领域视图（当前为 `labor`） |
+| POST | `/api/search_law` | 检索-only：给 MCP / Agent 返回条文证据，不生成长文本 |
+| POST | `/api/get_article` | 按法律名 + 条号取全文（支持 第四十三条 / 第43条 / 43 / 之一） |
+| GET | `/api/corpus_info` | 语料规模、领域、覆盖边界 |
+
+### 4.7 MCP 工具（给 Agent 调用）
+
+`mcp_server/server.py` 是薄封装：只调上面的 HTTP 接口，不 import `app.py`，不重复加载模型。
+
+```bash
+python mcp_server/server.py                  # stdio（开发 / Claude Code）
+python mcp_server/server.py streamable-http  # HTTP（部署，默认 127.0.0.1:8000/mcp）
+```
+
+> MCP server 只需装有 `mcp` 的解释器（本机用 `edu_agent` 环境）；它只调 HTTP，
+> 不需要 lawrag 的 GPU 环境。想在 Claude Code 里直接用，把 `mcp_server/example.mcp.json`
+> 的 `lawrag` 段合并到项目的 `.mcp.json`。
+
+工具：`search_law` / `get_article` / `get_corpus_info`。
+冒烟测试（需 lawrag 已启动，且解释器装有 `mcp`）：
+
+```bash
+python tools/mcp_smoke_test.py
+```
+
+Python 调用示例：
+
+```python
+import requests
+r = requests.post("http://127.0.0.1:8080/api/search_law",
+                  json={"query": "试用期最长多久", "top_k": 3, "domain": "labor"})
+print(r.json()["results"])
+```
 
 ---
 
@@ -212,6 +245,7 @@ lawrag/
 │  ├─ data/                   # 法律原文、分类数据、评测产物
 │  └─ rag_assessment/         # RAGAS 评测脚本
 ├─ static/index.html          # 前端页面（流式对话 + 引用展示）
+├─ mcp_server/server.py       # MCP 薄封装（search_law / get_article / get_corpus_info）
 ├─ tools/                     # 数据采集 / 建库 / 评测 / 调参脚本
 └─ docs/                      # 方案书、流程图与迭代记录
 ```
@@ -236,7 +270,7 @@ python tools/tune_fast_channel_gate.py
 # 生成质量（RAGAS 四项指标）：先建评测集 → 跑 RAG 通道收答案 → 判分
 python tools/build_law_ragas_set.py
 python tools/collect_law_ragas_answers.py --workers 8
-python rag_qa/rag_assessment/ragas_evaluate.py --data rag_qa/data/law_eval/ragas/law_ragas_set.json --out rag_qa/data/law_eval/ragas/ragas_law.csv
+python rag_qa/rag_assessment/ragas_evaluate.py --data rag_qa/data/law_eval/ragas/law_ragas_answers.json --judge-model qwen-max --out rag_qa/data/law_eval/ragas/ragas_law.csv
 ```
 
 评测数据与结果落在 `rag_qa/data/law_eval/`（体积较大，已 gitignore，按上面的脚本可重新生成）。

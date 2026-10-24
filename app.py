@@ -14,8 +14,12 @@ import uuid
 from typing import Optional
 import time
 import re
+import threading
+from datetime import date
 
 from base.config import config
+from base.domains import list_domains, law_names_for
+from mysql_qa.db.mysql_client import MySQLClient
 # 导入现有的系统
 from new_main import IntegratedQASystem
 
@@ -36,6 +40,11 @@ os.makedirs("static", exist_ok=True)
 
 # 创建全局QA系统实例
 qa_system = IntegratedQASystem()
+
+# 工具接口专用：独立 DB 连接 + 锁，避免和对话链路的共享游标互相踩
+tool_db = MySQLClient()
+tool_db_lock = threading.Lock()
+tool_search_lock = threading.Lock()
 
 # 定义日常问候用语模式和回复（法律问答场景）
 GREETING_PATTERNS = [
@@ -63,6 +72,10 @@ class QueryRequest(BaseModel):
     query: str
     source_filter: Optional[str] = None
     session_id: Optional[str] = None
+    # 领域视图：domain 为领域名（如 labor），domain_mode 为 off / soft / strict
+    domain: Optional[str] = None
+    domain_mode: Optional[str] = "off"
+    allow_faq: Optional[bool] = True
 
 
 # 定义响应模型，我给前端的
@@ -71,6 +84,19 @@ class QueryResponse(BaseModel):
     is_streaming: bool
     session_id: str
     processing_time: float
+
+
+# MCP / Agent 工具接口的请求模型（只检索，不生成长文本）
+class SearchLawRequest(BaseModel):
+    query: str
+    top_k: int = 5
+    domain: Optional[str] = None
+    effective_only: bool = True
+
+
+class GetArticleRequest(BaseModel):
+    law_name: str
+    article_no: str
 
 
 # 添加静态文件服务
@@ -153,7 +179,10 @@ async def query(request: QueryRequest):
         }
 
     # 判断是否需要流式处理（基于 need_rag）
-    query_result = qa_system.query(request.query, request.source_filter, session_id)
+    query_result = qa_system.query(
+        request.query, request.source_filter, session_id,
+        domain=request.domain, domain_mode=request.domain_mode or "off",
+        allow_faq=request.allow_faq if request.allow_faq is not None else True)
     
     first_chunk = next(query_result, None)
     if first_chunk is None:
@@ -196,6 +225,9 @@ async def websocket_endpoint(websocket: WebSocket):
             query = request_data.get("query")
             source_filter = request_data.get("source_filter")
             session_id = request_data.get("session_id", str(uuid.uuid4()))
+            domain = request_data.get("domain")
+            domain_mode = request_data.get("domain_mode") or "off"
+            allow_faq = request_data.get("allow_faq", True)
 
             start_time = time.time()
 
@@ -225,7 +257,9 @@ async def websocket_endpoint(websocket: WebSocket):
 
             # 调用QA系统进行查询，流式返回结果
             collected_answer = ""
-            for token, is_complete in qa_system.query(query, source_filter=source_filter, session_id=session_id):
+            for token, is_complete in qa_system.query(
+                    query, source_filter=source_filter, session_id=session_id,
+                    domain=domain, domain_mode=domain_mode, allow_faq=allow_faq):
                 collected_answer += token
 
                 if is_complete and not collected_answer:
@@ -284,6 +318,83 @@ async def health_check():
 @app.get("/api/sources")
 async def get_sources():
     return {"sources": config.VALID_SOURCES}
+
+
+# 获取可用的领域视图（劳动法等）
+@app.get("/api/domains")
+async def get_domains():
+    return {"domains": list_domains()}
+
+
+# 检索-only：给 MCP / Agent 用，只返回证据，不生成长文本
+@app.post("/api/search_law")
+def search_law(request: SearchLawRequest):
+    query = (request.query or "").strip()
+    if not query:
+        raise HTTPException(status_code=400, detail="query 不能为空")
+    top_k = max(1, min(int(request.top_k or 5), 20))
+
+    law_names = None
+    if request.domain:
+        law_names = law_names_for(request.domain)
+        if not law_names:
+            raise HTTPException(status_code=404, detail=f"未知领域: {request.domain}")
+
+    try:
+        with tool_search_lock:
+            docs = qa_system.vector_store.search_children(
+                query, k=top_k, source_filter="law",
+                effective_only=bool(request.effective_only),
+                law_names=law_names, with_score=True)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"检索失败: {e}")
+
+    results = [{
+        "law_name": d.metadata.get("law_name", ""),
+        "article_no": d.metadata.get("article_no", ""),
+        "text": d.page_content,
+        "chapter": d.metadata.get("chapter", ""),
+        "status": d.metadata.get("status", ""),
+        "score": d.metadata.get("score"),
+    } for d in docs]
+    return {
+        "query": query,
+        "domain": request.domain,
+        "effective_only": bool(request.effective_only),
+        "count": len(results),
+        "results": results,
+    }
+
+
+# 取条：按法律名 + 条号取全文，条号支持 第四十三条 / 第43条 / 43 / 第四十三条之一
+@app.post("/api/get_article")
+def get_article(request: GetArticleRequest):
+    law_name = (request.law_name or "").strip()
+    article_no = (request.article_no or "").strip()
+    if not law_name or not article_no:
+        raise HTTPException(status_code=400, detail="law_name 和 article_no 不能为空")
+    with tool_db_lock:
+        detail = tool_db.find_law_article_detail_flexible(law_name, article_no)
+    if not detail:
+        raise HTTPException(status_code=404, detail=f"未找到《{law_name}》{article_no}")
+    return detail
+
+
+# 语料信息：给 Agent 说明覆盖范围和规模
+@app.get("/api/corpus_info")
+def get_corpus_info():
+    with tool_db_lock:
+        tool_db.cursor.execute(
+            "SELECT COUNT(*), COUNT(DISTINCT law_name), SUM(status='有效') FROM law_articles")
+        total, laws, valid = tool_db.cursor.fetchone()
+    return {
+        "law_count": int(laws or 0),
+        "article_count": int(total or 0),
+        "valid_article_count": int(valid or 0),
+        "as_of": date.today().isoformat(),
+        "domains": list_domains(),
+        "coverage_note": "仅覆盖全国人大及其常委会制定的法律级文本；不含行政法规、司法解释、地方规定。",
+    }
 
 
 if __name__ == "__main__":
