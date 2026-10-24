@@ -176,17 +176,22 @@ class AssembleTest(unittest.TestCase):
             }]
         }
         findings, verified = hc.build_findings([hit], candidates)
-        # 不合格的 basis 被丢弃；保留的 basis 为空，citation_verified 按定义仍为 true
-        self.assertTrue(verified)
+        # 不合格的 basis 被丢弃；该风险项没有可回查依据，citation_verified 必须为 false
+        self.assertFalse(verified)
         self.assertEqual(findings[0]["basis"], [])
         self.assertTrue(findings[0]["needs_human"])
 
     def test_empty_candidates_needs_human(self):
         hit = self._hit("薪资面议")
         findings, verified = hc.build_findings([hit], {})
-        self.assertTrue(verified)  # 没有非空 basis，citation_verified 视为 true
+        self.assertFalse(verified)  # 有风险项但没有 basis -> 引用未完成
         self.assertEqual(findings[0]["basis"], [])
         self.assertTrue(findings[0]["needs_human"])
+
+    def test_no_findings_citation_verified_true(self):
+        findings, verified = hc.build_findings([], {})
+        self.assertEqual(findings, [])
+        self.assertTrue(verified)  # 干净文本没有引用需要校验
 
     def test_risk_level_aggregation(self):
         self.assertEqual(hc.risk_level_for([]), "low")

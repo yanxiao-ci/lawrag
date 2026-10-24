@@ -503,11 +503,11 @@ def risk_level_for(findings: list) -> str:
 def build_findings(hits: list, candidate_map: dict, llm_basis: Optional[dict] = None) -> tuple:
     """组装 findings，并逐条做 quote 回查。
 
-    返回 (findings, all_verified)：all_verified 只针对非空 basis。
+    返回 (findings, all_verified)：all_verified 表示每个风险项都至少有一条
+    通过逐字回查的 basis；无 findings（干净文本）时为 True。
     """
     llm_basis = llm_basis or {}
     findings = []
-    all_verified = True
 
     for hit in hits:
         rule_id = hit.get("rule_id", "")
@@ -533,6 +533,8 @@ def build_findings(hits: list, candidate_map: dict, llm_basis: Optional[dict] = 
             "basis": basis,
             "needs_human": bool(needs_human),
         })
+    # 有风险项但没有任何可回查 basis，说明该风险项没有完成引用校验
+    all_verified = all(bool(item["basis"]) for item in findings)
     return findings, all_verified
 
 

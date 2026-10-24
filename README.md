@@ -224,6 +224,7 @@ python app.py          # 或 uvicorn app:app --host 0.0.0.0 --port 8080
 口径：
 - 规则只负责定位片段、类别与建议，不产生条号；条号只来自 `law_hint` 的 MySQL 回查，或严格劳动法领域检索兜底；
 - `quote` 归一化空白/全半角标点后必须是 MySQL `article_text` 的连续子串，否则丢弃该 basis 并标 `needs_human=true`；
+- `citation_verified`：每个风险项都至少有一条通过逐字回查的 basis；干净文本无风险项时为 true；有风险项但 basis 为空时为 false，并同时标 `needs_human=true`；
 - LLM 只做闭集选条（5s 超时，失败回退确定性 hint），不改 span / category / severity；
 - `risk_level` 由规则 `severity` 聚合，不给 LLM；
 - 仅覆盖法律级文本（不含《女职工劳动保护特别规定》等行政法规）。
