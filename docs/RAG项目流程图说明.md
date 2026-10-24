@@ -54,7 +54,7 @@
 
 三条并行链路，共用同一份法条原文：
 
-1. **RAG 法条向量库**：法条原文 → 法条解析（法律名 / 条号 / 正文）→ 法条边界切分（子块 = 一条完整法条，父块 = 同法连续 5 条）→ BGE-M3 向量化 → upsert 到 Milvus 集合 `lawrag`（55,847 块）。
+1. **RAG 法条向量库**：法条原文 → 法条解析（法律名 / 条号 / 正文）→ 法条边界切分（子块 = 一条完整法条，父块 = 同法连续 5 条）→ BGE-M3 向量化 → upsert 到 Milvus 集合 `lawrag`（21,565 块）。
 2. **结构化法条表 + 快问快答库**：法条入库 MySQL `law_articles`（含编/章/节、公布日、施行日、时效状态）→ 供条文号精确路由与法条 BM25 使用；`law_qa.csv`（2 万条）→ MySQL 表 `law_faq` → Redis 问题列表 → BM25Okapi 双索引。
 3. **问答向量库**：`law_faq` 的 2 万条问答 → BGE-M3 向量化 → Milvus 集合 `lawfaq`，作为 RAG 的**第三召回源**。
 
@@ -120,7 +120,7 @@ flowchart TD
 
   subgraph OFFLINE[离线：知识库构建]
     direction LR
-    D[/法律法规原文 .txt 292 部/] --> S[法条解析 + 边界切分<br/>子块=单条法条 · 父块=连续 5 条] --> V[BGE-M3 向量化] --> MV[(Milvus 集合 lawrag · 55,847 块)]
+    D[/法律法规原文 .txt 292 部/] --> S[法条解析 + 边界切分<br/>子块=单条法条 · 父块=连续 5 条] --> V[BGE-M3 向量化] --> MV[(Milvus 集合 lawrag · 21,565 块)]
     D --> MY[(MySQL 表 law_articles · 21,565 条)]
     C2[/law_qa.csv 2 万条/] --> J[(MySQL 表 law_faq)] --> R[(Redis 问题列表)] --> BM[BM25Okapi 双索引]
     J --> FV[(Milvus 集合 lawfaq · 2 万条)]
@@ -144,7 +144,7 @@ flowchart LR
     A3 --> A4["父块聚合<br/>同一部法律连续 5 条"]
     A4 --> A5["父子关系元数据<br/>parent_id · parent_content · id(md5)"]
     A5 --> A6["BGE-M3 向量化<br/>稠密 1024 维 + 稀疏"]
-    A6 --> A7[(Milvus 集合 lawrag · 55,847 块)]
+    A6 --> A7[(Milvus 集合 lawrag · 21,565 块)]
   end
   subgraph S2[② 结构化法条表 + 快问快答库 + ③ 问答向量库]
     direction LR

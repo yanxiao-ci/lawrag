@@ -2,6 +2,7 @@ from rag_qa.core.prompts import RAGPrompts
 #   导入 time 模块，用于计算时间   带记忆 + 流式的版本
 import time
 from base.config import config
+from base.domains import faq_domain_for, get_domain, law_names_for
 from base.logger import logger
 from rag_qa.core.query_classifier import QueryClassifier  # 导入查询分类器
 from rag_qa.core.strategy_selector import StrategySelector  # 导入策略选择器
@@ -34,8 +35,8 @@ class RAGSystem:
         self.max_prompt_length = 4096
 
     #   定义私有方法，使用假设文档进行检索（HyDE）
-    def _retrieve_with_hyde(self, query, source_filter=None):
-        logger.info(f"_retrieve_with_hyde 使用 HyDE 策略进行检索 (查询: '{query}', 过滤条件: {source_filter})")
+    def _retrieve_with_hyde(self, query, source_filter=None, law_names=None):
+        logger.info(f"_retrieve_with_hyde 使用 HyDE 策略进行检索 (查询: '{query}', 过滤条件: {source_filter}, 领域法数: {len(law_names) if law_names else 0})")
         #   获取假设问题生成的 Prompt 模板
         hyde_prompt_template = RAGPrompts.hyde_prompt()  # 使用 template 后缀区分
         #   调用大语言模型生成假设答案
@@ -47,15 +48,15 @@ class RAGSystem:
             #   注意：HyDE 通常只用于生成检索向量，不一定需要 rerank 这一步，但这里复用了
             return self.vector_store.hybrid_search_with_rerank(
                 hypo_answer, k=config.RETRIEVAL_K,  # 使用 K 而非 M
-                source_filter=source_filter
+                source_filter=source_filter, law_names=law_names
             )
         except Exception as e:
             logger.error(f"HyDE 策略执行失败: {e}")
             return []
 
     #   定义私有方法，使用子查询进行检索
-    def _retrieve_with_subqueries(self, query, source_filter=None):
-        logger.info(f"_retrieve_with_subqueries 使用子查询策略进行检索 (查询: '{query}', 过滤条件: {source_filter})")
+    def _retrieve_with_subqueries(self, query, source_filter=None, law_names=None):
+        logger.info(f"_retrieve_with_subqueries 使用子查询策略进行检索 (查询: '{query}', 过滤条件: {source_filter}, 领域法数: {len(law_names) if law_names else 0})")
         #   获取子查询生成的 Prompt 模板
         subquery_prompt_template = RAGPrompts.subquery_prompt()  # 使用 template 后缀区分
         try:
@@ -76,7 +77,7 @@ class RAGSystem:
                 #   这里对每个子查询都执行了 hybrid search + rerank，开销可能较大
                 docs = self.vector_store.hybrid_search_with_rerank(
                     sub_q, k=config.RETRIEVAL_K,  # 使用 K
-                    source_filter=source_filter
+                    source_filter=source_filter, law_names=law_names
                 )
                 all_docs.extend(docs)
                 logger.info(f"子查询 '{sub_q}' 检索到 {len(docs)} 个文档")
@@ -96,8 +97,8 @@ class RAGSystem:
             return []
 
     #   定义私有方法，使用回溯问题进行检索
-    def _retrieve_with_backtracking(self, query, source_filter=None):
-        logger.info(f"_retrieve_with_backtracking 使用回溯问题策略进行检索 (查询: '{query}', 过滤条件: {source_filter})")
+    def _retrieve_with_backtracking(self, query, source_filter=None, law_names=None):
+        logger.info(f"_retrieve_with_backtracking 使用回溯问题策略进行检索 (查询: '{query}', 过滤条件: {source_filter}, 领域法数: {len(law_names) if law_names else 0})")
         #   获取回溯问题生成的 Prompt 模板
         backtrack_prompt_template = RAGPrompts.backtracking_prompt()  # 使用 template 后缀区分
         try:
@@ -107,15 +108,31 @@ class RAGSystem:
             logger.info(f"生成的回溯问题: '{simplified_query}'")
             #   使用回溯问题进行检索，并返回检索结果
             return self.vector_store.hybrid_search_with_rerank(
-                simplified_query, k=config.RETRIEVAL_K, source_filter=source_filter
+                simplified_query, k=config.RETRIEVAL_K, source_filter=source_filter,
+                law_names=law_names
             )
         except Exception as e:
             logger.error(f"回溯问题策略执行失败: {e}")
             return []
 
     #   定义方法，检索并合并相关文档
-    def retrieve_and_merge(self, query, source_filter=None, strategy=None):  # 新增 strategy 参数
-        logger.info(f"retrieve_and_merge 开始处理查询: '{query}', 来源过滤: {source_filter}")
+    def retrieve_and_merge(self, query, source_filter=None, strategy=None,
+                           domain=None, domain_mode="off", allow_faq=True):
+        """检索并拼接上下文。
+
+        domain / domain_mode 是领域视图：
+          off    : 不过滤（默认，行为与改造前一致）
+          soft   : 先按领域法名过滤；父块不足 CANDIDATE_M 时放开过滤重试
+          strict : 只按领域法名过滤，不兜底（合规取证用）
+        """
+        use_domain = bool(domain) and domain_mode in ("soft", "strict")
+        law_names = law_names_for(domain) if use_domain else None
+        faq_domain = faq_domain_for(domain) if use_domain else None
+        if domain and not use_domain:
+            logger.info(f"已指定领域 {domain}，但 domain_mode={domain_mode}，本次不启用领域过滤")
+        logger.info(f"retrieve_and_merge 开始处理查询: '{query}', 来源过滤: {source_filter}, "
+                    f"领域: {domain}, 模式: {domain_mode}, 领域法数: {len(law_names) if law_names else 0}")
+
         # 如果未指定检索策略，则使用策略选择器选择
         if not strategy:
             strategy = self.strategy_selector.select_strategy(query)
@@ -123,52 +140,68 @@ class RAGSystem:
         #   根据检索策略选择不同的检索方式
         ranked_sub_chunks = []  # 初始化
         if strategy == "回溯问题检索":
-            ranked_sub_chunks = self._retrieve_with_backtracking(query, source_filter)
+            ranked_sub_chunks = self._retrieve_with_backtracking(query, source_filter, law_names)
         elif strategy == "子查询检索":
-            ranked_sub_chunks = self._retrieve_with_subqueries(query, source_filter)  # 返回的是唯一文档列表
+            ranked_sub_chunks = self._retrieve_with_subqueries(query, source_filter, law_names)
             # 注意：子查询返回的是已 rerank 过的父文档或子块列表，后续合并逻辑可能需要调整
-            # 当前实现中，子查询返回的是初步检索（可能已rerank）的块，再进行合并
         elif strategy == "假设问题检索":
-            ranked_sub_chunks = self._retrieve_with_hyde(query, source_filter)
+            ranked_sub_chunks = self._retrieve_with_hyde(query, source_filter, law_names)
         else:  # 默认或“直接检索”
             logger.info(f"使用直接检索策略 (查询: '{query}')")
             ranked_sub_chunks = self.vector_store.hybrid_search_with_rerank(
-                query, k=config.RETRIEVAL_K, source_filter=source_filter
+                query, k=config.RETRIEVAL_K, source_filter=source_filter, law_names=law_names
             )  # 注意 hybrid_search_with_rerank 返回的是 rerank 后的父文档
 
         logger.info(f"策略 '{strategy}' 检索到 {len(ranked_sub_chunks)} 个候选文档 (可能已是父文档)")
-        # if strategy == "子查询检索":
-        #     # TODO 排序，将每个子查询的第一个文档拿到，合并，返回
-        #     # final_context_docs = self._merge_sub_chunks(ranked_sub_chunks)
-        #     pass
-        # else:
-        #     final_context_docs = ranked_sub_chunks[:config.CANDIDATE_M]
+
+        # soft 模式兜底：领域过滤命中不足时放开过滤，避免“聚焦”变成“漏答”。
+        domain_fallback = False
+        if law_names and domain_mode == "soft" and len(ranked_sub_chunks) < config.CANDIDATE_M:
+            logger.info("领域过滤命中不足，soft 模式放开过滤重试")
+            extra = self.vector_store.hybrid_search_with_rerank(
+                query, k=config.RETRIEVAL_K, source_filter=source_filter, law_names=None
+            )
+            seen = {d.page_content for d in ranked_sub_chunks}
+            for d in extra:
+                if d.page_content not in seen:
+                    d.metadata["domain_fallback"] = True
+                    ranked_sub_chunks.append(d)
+                    seen.add(d.page_content)
+            domain_fallback = True
+            logger.info(f"兜底后候选文档 {len(ranked_sub_chunks)} 个")
 
         final_context_docs = ranked_sub_chunks[:config.CANDIDATE_M]
 
         # P2：第三召回源——law_faq 的 2 万条法律问答。
         # 法条检索漏掉的条文，问答对常常能补上：实测条文覆盖率 62.5% → 81.9%。
         # 问答走单独一路召回，用同一个精排模型排序，最多补充 FAQ_INJECT_N 条；
-        # 失败只记日志，不影响法条链路。
-        try:
-            faq_docs = self.vector_store.search_faq(query, k=FAQ_RETRIEVAL_K)
-            if faq_docs:
-                scores = self.vector_store.reranker.predict([[query, d.page_content] for d in faq_docs])
-                faq_docs = [d for _, d in sorted(zip(scores, faq_docs), reverse=True)][:FAQ_INJECT_N]
-                logger.info(f"FAQ 召回 {len(faq_docs)} 条问答作为补充上下文")
-                final_context_docs = final_context_docs + faq_docs
-        except Exception as e:
-            logger.error(f"FAQ 召回失败（不影响法条链路）: {e}")
+        # 失败只记日志，不影响法条链路。合规场景 allow_faq=False，避免合成 FAQ 当依据。
+        if allow_faq:
+            try:
+                faq_docs = self.vector_store.search_faq(query, k=FAQ_RETRIEVAL_K, domain=faq_domain)
+                if faq_docs:
+                    scores = self.vector_store.reranker.predict([[query, d.page_content] for d in faq_docs])
+                    faq_docs = [d for _, d in sorted(zip(scores, faq_docs), reverse=True)][:FAQ_INJECT_N]
+                    logger.info(f"FAQ 召回 {len(faq_docs)} 条问答作为补充上下文")
+                    final_context_docs = final_context_docs + faq_docs
+            except Exception as e:
+                logger.error(f"FAQ 召回失败（不影响法条链路）: {e}")
+
+        # 只有兜底追加的文档标 True；命中的领域内文档保持 False
+        for d in final_context_docs:
+            d.metadata.setdefault("domain_fallback", False)
 
         logger.info(f"最终选取 {len(final_context_docs)} 个文档作为上下文")
         return final_context_docs
 
     # 添加完历史消息后，定义方法，生成答案
     # 修改 rag_system.py 中的 generate_answer 方法
-    def generate_answer(self, query, source_filter=None, history=None):
-        """生成答案，支持对话历史，限制提示长度，并支持流式输出"""
+    def generate_answer(self, query, source_filter=None, history=None,
+                        domain=None, domain_mode="off", allow_faq=True):
+        """生成答案，支持对话历史、领域视图，限制提示长度，并支持流式输出"""
         start_time = time.time()
-        logger.info(f"generate_answer 开始处理查询: '{query}', 来源过滤: {source_filter}")
+        logger.info(f"generate_answer 开始处理查询: '{query}', 来源过滤: {source_filter}, "
+                    f"领域: {domain}, 模式: {domain_mode}")
 
         # 验证历史格式
         if history is not None and not isinstance(history, list):
@@ -208,7 +241,8 @@ class RAGSystem:
                 strategy = self.strategy_selector.select_strategy(query)  # 根据用户的query选择检索策略
                 # 根据检索策略，返回检索上下文
                 context_docs = self.retrieve_and_merge(
-                    query, source_filter=source_filter, strategy=strategy
+                    query, source_filter=source_filter, strategy=strategy,
+                    domain=domain, domain_mode=domain_mode, allow_faq=allow_faq
                 )
                 context = "\n\n".join([self._format_context_doc(doc) for doc in context_docs]) if context_docs else ""
                 logger.info(f"构建上下文完成，包含 {len(context_docs)} 个文档块")

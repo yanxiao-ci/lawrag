@@ -1,0 +1,40 @@
+{
+ "data": "rag_qa/data/hr_eval/retrieval_hr_core.jsonl",
+ "profile": "labor",
+ "k": 5,
+ "results": {
+  "off": {
+   "n": 400,
+   "seconds": 117.8,
+   "mrr": 0.8434,
+   "recall@1": 0.7525,
+   "recall@3": 0.9425,
+   "recall@5": 0.9575,
+   "cross_domain_rate": 0.2247,
+   "fallback_rate": 0.0,
+   "abstain_rate": 0.0425
+  },
+  "soft": {
+   "n": 400,
+   "seconds": 114.3,
+   "mrr": 0.88,
+   "recall@1": 0.805,
+   "recall@3": 0.9575,
+   "recall@5": 0.975,
+   "cross_domain_rate": 0.0,
+   "fallback_rate": 0.0,
+   "abstain_rate": 0.025
+  },
+  "strict": {
+   "n": 400,
+   "seconds": 115.6,
+   "mrr": 0.88,
+   "recall@1": 0.805,
+   "recall@3": 0.9575,
+   "recall@5": 0.975,
+   "cross_domain_rate": 0.0,
+   "fallback_rate": 0.0,
+   "abstain_rate": 0.025
+  }
+ }
+}

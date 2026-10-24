@@ -30,6 +30,8 @@ ap.add_argument("--topn", type=int, default=2, help="注入上下文条数 = CAN
 ap.add_argument("--k", type=int, default=5, help="粗排候选数 = RETRIEVAL_K")
 ap.add_argument("--strategy", default="直接检索")
 ap.add_argument("--limit", type=int, default=0)
+ap.add_argument("--domain", default=None, help="领域视图名（如 labor）；默认不过滤")
+ap.add_argument("--domain-mode", default="off", choices=["off", "soft", "strict"])
 args = ap.parse_args()
 
 # 必须在 import config/vector_store 之前设进环境变量：config 是导入时读取的
@@ -57,7 +59,9 @@ def main():
         want = extract_citations(it["ground_truth"])
         if not want:
             continue
-        docs = rag.retrieve_and_merge(it["question"], source_filter="law", strategy=args.strategy)
+        docs = rag.retrieve_and_merge(
+            it["question"], source_filter="law", strategy=args.strategy,
+            domain=args.domain, domain_mode=args.domain_mode)
         contexts = [rag._format_context_doc(d) for d in docs] if docs else []
         n += 1
         empty_ctx += (not contexts)
@@ -80,8 +84,9 @@ def main():
         "empty_context": empty_ctx,
     }
     print("\n" + json.dumps(res, ensure_ascii=False), flush=True)
+    prefix = f"coverage_{args.domain}_{args.domain_mode}_" if args.domain else "coverage_"
     out = os.path.join(ROOT, "rag_qa", "data", "law_eval", "ragas",
-                       f"coverage_topn{args.topn}_k{args.k}.json")
+                       f"{prefix}topn{args.topn}_k{args.k}.json")
     json.dump(res, open(out, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(f"已存：{os.path.relpath(out, ROOT)}", flush=True)
 

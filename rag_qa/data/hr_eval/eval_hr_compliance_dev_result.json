@@ -1,0 +1,66 @@
+{
+  "generated_at": "2026-10-24T13:09:53.602026+00:00",
+  "model": "qwen3.6-plus",
+  "seed": 0,
+  "split": "dev",
+  "dataset": "rag_qa\\data\\hr_eval\\jd_compliance_140.jsonl",
+  "dataset_sha256": "f7253a2de336679dc124c125a8b9cda759c3ca1bbb9fbfe369e88e1cce54c9b6",
+  "base_url": "http://127.0.0.1:8080",
+  "elapsed_seconds": 26.89,
+  "latency": {
+    "avg": 1.295,
+    "p95": 2.378,
+    "max": 3.466
+  },
+  "llm_used_rate": 0.65,
+  "errors": [],
+  "metrics": {
+    "n": 60,
+    "tp": 41,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "risk_level_accuracy": 1.0,
+    "citation_accuracy": 1.0,
+    "basis_total": 54,
+    "basis_valid": 54,
+    "findings_with_basis": 40,
+    "findings_basis_valid": 40,
+    "clean_items": 15,
+    "clean_false_positive_rate": 0.0,
+    "clean_risk_low_rate": 1.0,
+    "per_category": {
+      "就业歧视": {
+        "tp": 30,
+        "fp": 0,
+        "fn": 0
+      },
+      "违法条款": {
+        "tp": 9,
+        "fp": 0,
+        "fn": 0
+      },
+      "虚假承诺": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      },
+      "表述不清": {
+        "tp": 1,
+        "fp": 0,
+        "fn": 0
+      }
+    }
+  },
+  "acceptance": {
+    "precision_ge_0.85": true,
+    "recall_ge_0.80": true,
+    "f1_ge_0.82": true,
+    "citation_ge_0.95": true,
+    "clean_fp_le_0.10": true,
+    "clean_low_ge_0.90": true
+  },
+  "all_passed": true
+}

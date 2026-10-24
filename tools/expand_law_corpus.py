@@ -115,8 +115,24 @@ def find_src(explicit):
 
 
 def split_articles(content):
-    """切出 [法条行...]，并按 编/章/节 标题统计区间 -> (articles, chapter_ranges)。"""
+    """切出 [法条行...]，并按 编/章/节 标题统计区间 -> (articles, chapter_ranges)。
+
+    法条正文可能跨多行（枚举项、说明段）：从「第X条」开始累积，直到下一条文头
+    或下一个编/章/节标题才收口。少了这一步，法条只会保留首行，
+    《妇女权益保障法》第43条这类「下列行为:」+ 五项枚举的条文会丢正文。
+    """
     articles, segs, stack, cur = [], [], {}, None
+    current_no = None
+    current_body = []
+
+    def flush():
+        nonlocal current_no, current_body
+        if current_no is None:
+            return
+        body = " ".join(x for x in current_body if x).strip()
+        articles.append(f"{current_no}\u3000{body}" if body else current_no)
+        current_no, current_body = None, []
+
     for raw in (content or "").splitlines():
         line = raw.strip().strip("\u3000").strip()
         if not line or line.startswith(">"):
@@ -124,9 +140,9 @@ def split_articles(content):
         line = line.replace("\u3000", " ").strip()
         m = ARTICLE_LINE.match(line)
         if m:
-            body = m.group("body").strip()
-            no = f"第{m.group('num')}条" + (f"之{m.group('suf')}" if m.group("suf") else "")
-            articles.append(f"{no}\u3000{body}" if body else no)
+            flush()
+            current_no = f"第{m.group('num')}条" + (f"之{m.group('suf')}" if m.group("suf") else "")
+            current_body = [m.group("body").strip()]
             num = cn2int(m.group("num"))
             path = " ".join(stack[k] for k in "编章节" if k in stack)
             if cur is None or cur["path"] != path:
@@ -137,6 +153,7 @@ def split_articles(content):
             continue
         o = OUTLINE_LINE.match(line)
         if o:
+            flush()
             unit = "节" if o.group(1).endswith("节") else ("编" if o.group(1).endswith("编") else "章")
             head = f"{o.group(1)} {o.group(2)}".strip()
             if unit == "编":
@@ -145,8 +162,11 @@ def split_articles(content):
             elif unit == "章":
                 stack.pop("节", None)
             stack[unit] = head
+            continue
+        if current_no is not None:
+            current_body.append(line)
+    flush()
     return articles, segs
-
 
 def safe_name(title):
     return re.sub(r'[\\/:*?"<>|]', "／", title).strip()
@@ -244,13 +264,23 @@ def main():
     old = []
     if os.path.isdir(LAW_DATA_DIR):
         old = [f for f in os.listdir(LAW_DATA_DIR) if f.endswith(".txt")]
+    # 不在本次生成列表里的文件是补充语料（如 KuugoRen 新增法律），不能跟着旧语料一起移走，
+    # 否则写完新语料后 adopt_unmanaged 扫不到它们，会静默丢掉几十条法条。
+    generated_titles = set(files)
+    unmanaged = [f for f in old if os.path.splitext(f)[0] not in generated_titles]
     if old and not args.keep_old:
         stamp = datetime.now().strftime("%Y%m%d")
         backup = os.path.join(BACKUP_ROOT, f"_backup_law_data_{stamp}")
         os.makedirs(backup, exist_ok=True)
+        moved = 0
         for f in old:
+            if f in unmanaged:
+                continue
             shutil.move(os.path.join(LAW_DATA_DIR, f), os.path.join(backup, f))
-        log(f"[3/5] 旧语料 {len(old)} 个文件已备份到 {os.path.relpath(backup, ROOT)}")
+            moved += 1
+        log(f"[3/5] 旧语料 {moved} 个文件已备份到 {os.path.relpath(backup, ROOT)}")
+        if unmanaged:
+            log(f"      保留 {len(unmanaged)} 个补充语料: {unmanaged}")
     else:
         log(f"[3/5] 旧语料 {len(old)} 个文件（keep-old 或目录为空，未备份）")
 

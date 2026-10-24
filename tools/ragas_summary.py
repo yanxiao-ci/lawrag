@@ -59,8 +59,10 @@ def load_metrics(path):
     """返回 ({metric: [分数...]}, 行数)。"""
     df = pd.read_csv(path)
     out = {m: [] for m in METRICS}
-    if all(m in df.columns for m in METRICS):          # 逐条明细
+    if any(m in df.columns for m in METRICS):           # 逐条明细（可只跑部分指标）
         for m in METRICS:
+            if m not in df.columns:
+                continue
             s = pd.to_numeric(df[m], errors="coerce").dropna()
             out[m] = [float(v) for v in s]
         return out, len(df)

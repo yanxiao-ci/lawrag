@@ -34,7 +34,7 @@ OUT_DEFAULT = os.path.join(ROOT, "rag_qa", "data", "law_eval", "ragas", "law_rag
 gpu_lock = threading.Lock()   # 意图分类 / 向量检索 / 精排 都吃 GPU，串行执行
 
 
-def run_one(qa, item, done, total, t0):
+def run_one(qa, item, done, total, t0, domain=None, domain_mode="off", allow_faq=True):
     """返回一条 RAGAS 记录；失败时带上 error 字段。"""
     q = item["question"]
     try:
@@ -42,7 +42,9 @@ def run_one(qa, item, done, total, t0):
             category = qa.rag_system.query_classifier.predict_category(q)
         strategy = qa.rag_system.strategy_selector.select_strategy(q)
         with gpu_lock:
-            docs = qa.rag_system.retrieve_and_merge(q, source_filter="law", strategy=strategy)
+            docs = qa.rag_system.retrieve_and_merge(
+                q, source_filter="law", strategy=strategy,
+                domain=domain, domain_mode=domain_mode, allow_faq=allow_faq)
             contexts = [qa.rag_system._format_context_doc(d) for d in docs] if docs else []
             prompt = qa.rag_system.rag_prompt.format(
                 context="\n\n".join(contexts), history="", question=q,
@@ -72,6 +74,9 @@ def main():
     ap.add_argument("--limit", type=int, default=0, help="只跑前 N 条（调试用，0=全部）")
     ap.add_argument("--resume", action="store_true",
                     help="已有产物时只补跑「答案为空」的条目（额度中断后接着跑）")
+    ap.add_argument("--domain", default=None, help="领域视图名（如 labor）；默认不过滤")
+    ap.add_argument("--domain-mode", default="off", choices=["off", "soft", "strict"])
+    ap.add_argument("--no-faq", action="store_true", help="不注入 FAQ 第三召回源")
     args = ap.parse_args()
 
     with open(args.data, encoding="utf-8") as f:
@@ -88,7 +93,8 @@ def main():
 
     todo = [(i, it) for i, it in enumerate(items) if it["question"] not in prev]
     print(f"评测集：{len(items)} 条，待跑 {len(todo)} 条"
-          f"（{os.path.relpath(args.data, ROOT)}），并发 {args.workers} | 模型 {config.LLM_MODEL}", flush=True)
+          f"（{os.path.relpath(args.data, ROOT)}），并发 {args.workers} | 模型 {config.LLM_MODEL}"
+          f" | 领域 {args.domain or 'off'}/{args.domain_mode} | FAQ {not args.no_faq}", flush=True)
 
     t0 = time.time()
     qa = IntegratedQASystem() if todo else None
@@ -100,7 +106,9 @@ def main():
         if it["question"] in prev:
             results[i] = prev[it["question"]]
     with ThreadPoolExecutor(max_workers=args.workers) as ex:
-        futures = {ex.submit(run_one, qa, it, done, len(todo), t0): i for i, it in todo}
+        futures = {ex.submit(run_one, qa, it, done, len(todo), t0,
+                             args.domain, args.domain_mode, not args.no_faq): i
+                   for i, it in todo}
         for fut in as_completed(futures):
             results[futures[fut]] = fut.result()
 

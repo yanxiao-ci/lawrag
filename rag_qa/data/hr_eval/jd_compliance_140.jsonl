@@ -1,0 +1,140 @@
+{"id": "hr-001", "text": "招聘后端工程师，限男性，35岁以下。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "限男性", "severity": "high"}, {"category": "就业歧视", "span": "35岁以下", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "hr-002", "text": "招聘客服专员，限女性，普通话标准。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "限女性", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "hr-003", "text": "招聘运营主管，男性优先，有团队管理经验。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "男性优先", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "hr-004", "text": "招聘行政专员，已婚已育优先。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "已婚已育", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "hr-005", "text": "招聘前台，未婚优先，形象好。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "未婚优先", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "hr-006", "text": "招聘财务会计，要求本市户口。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "本市户口", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "hr-007", "text": "招聘仓库管理员，仅限本地人员。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "仅限本地", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "hr-008", "text": "招聘市场专员，少数民族优先。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "民族", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "hr-009", "text": "招聘生产操作员，要求无残疾。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "无残疾", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "hr-010", "text": "招聘配送员，要求身体健康，能吃苦耐劳。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "身体健康", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "hr-011", "text": "招聘安保人员，身高170cm以上。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "身高", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "hr-012", "text": "招聘商务接待，形象气质佳，沟通能力强。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "形象气质佳", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "hr-013", "text": "招聘项目助理，试用期9个月，表现优秀可转正。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "试用期9个月", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "hr-014", "text": "招聘销售代表，试用期12个月。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "试用期12个月", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "hr-015", "text": "招聘客服，入职后不缴社保，以现金补贴代替。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "不缴社保", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "hr-016", "text": "招聘司机，入职需交押金。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "押金", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "hr-017", "text": "招聘程序员，接受996工作制。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "996", "severity": "medium"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "hr-018", "text": "招聘门店店员，每周单休。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "单休", "severity": "medium"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "hr-019", "text": "招聘课程顾问，入职保证录用。", "scope": "jd", "gold_findings": [{"category": "虚假承诺", "span": "保证录用", "severity": "medium"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "hr-020", "text": "招聘设计师，薪资面议。", "scope": "jd", "gold_findings": [{"category": "表述不清", "span": "薪资面议", "severity": "medium"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "hr-021", "text": "招聘后端工程师，本科及以上学历，3年以上 Python 经验，熟悉 FastAPI 与 PostgreSQL。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "hr-022", "text": "招聘健康管理师，需持健康管理师证书，负责健康档案管理。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "hr-023", "text": "招聘产品经理，负责需求分析与跨部门协作，熟悉 B 端产品。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "hr-024", "text": "招聘销售专员，底薪 6000-9000 元加提成，缴纳五险一金。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "hr-025", "text": "招聘前端工程师，熟悉 Vue3 与 TypeScript，有组件库经验优先。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "hr-026", "text": "招聘人事专员，负责劳动合同管理、入离职办理与员工关系维护。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "hr-027", "text": "招聘数据分析师，熟悉 SQL 与 Python，具备良好沟通能力。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "hr-028", "text": "招聘运维工程师，接受轮班值守，提供夜班补贴。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "hr-029", "text": "招聘行政助理，要求工作细致、有责任心，能熟练使用 Office。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "hr-030", "text": "招聘培训讲师，负责课程设计与授课，有教育行业经验优先。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-dev-viol-01", "text": "招聘后端工程师，限男性，负责服务端开发。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "限男性", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-02", "text": "招聘前端工程师，限女性，要求Java。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "限女性", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-03", "text": "招聘产品经理，女性优先，可接受应届生。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "女性优先", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-04", "text": "招聘运营专员，仅限女，工作时间固定。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "仅限女", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-05", "text": "招聘客服专员，已婚优先，稳定性好。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "已婚优先", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-06", "text": "招聘销售代表，未婚优先，可接受外派。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "未婚优先", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-07", "text": "招聘会计，需提供生育计划。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "生育计划", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-08", "text": "招聘人事专员，40岁以上。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "40岁以上", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-09", "text": "招聘行政助理，年龄要求30岁以内。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "年龄要求", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-10", "text": "招聘市场专员，28岁以下，能接受出差。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "28岁以下", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-11", "text": "招聘仓库管理员，要求本市户口。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "本市户口", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-12", "text": "招聘配送员，仅限本地人员。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "仅限本地", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-13", "text": "招聘司机，有宗教要求。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "宗教", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-14", "text": "招聘设计师，需说明民族。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "民族", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-15", "text": "招聘数据分析师，要求无残疾。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "无残疾", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-16", "text": "招聘运维工程师，无传染病方可入职。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "无传染病", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-17", "text": "招聘门店店员，身高170cm以上。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "身高", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-18", "text": "招聘课程顾问，形象气质佳。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "形象气质佳", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-19", "text": "招聘测试工程师，五官端正。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "五官端正", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-20", "text": "招聘采购专员，试用期12个月。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "试用期12个月", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-21", "text": "招聘后端工程师，试用期超过6个月。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "试用期超过", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-22", "text": "招聘前端工程师，入职后不缴社保。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "不缴社保", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-23", "text": "招聘产品经理，不缴纳社保，以补贴代替。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "不缴纳社保", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-24", "text": "招聘运营专员，需签自愿放弃社保承诺书。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "自愿放弃社保", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-25", "text": "招聘客服专员，需缴纳保证金。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "保证金", "severity": "high"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-26", "text": "招聘销售代表，接受996工作制。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "996", "severity": "medium"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-27", "text": "招聘会计，实行大小周。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "大小周", "severity": "medium"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-28", "text": "招聘人事专员，每月休息2天。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "每月休息2天", "severity": "medium"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-29", "text": "招聘行政助理，入职保证录用。", "scope": "jd", "gold_findings": [{"category": "虚假承诺", "span": "保证录用", "severity": "medium"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-dev-viol-30", "text": "招聘市场专员，薪资面议。", "scope": "jd", "gold_findings": [{"category": "表述不清", "span": "薪资面议", "severity": "medium"}], "clean": false, "boundary": false, "split": "dev"}
+{"id": "gen-test-viol-01", "text": "招聘人事专员，无传染病方可入职。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "无传染病", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-02", "text": "招聘行政助理，乙肝携带者不考虑。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "乙肝", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-03", "text": "招聘市场专员，体重不超过标准。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "体重", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-04", "text": "招聘仓库管理员，五官端正。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "五官端正", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-05", "text": "招聘配送员，试用期12个月。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "试用期12个月", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-06", "text": "招聘司机，试用期8个月，表现优秀可转正。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "试用期8个月", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-07", "text": "招聘设计师，试用期10个月。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "试用期10个月", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-08", "text": "招聘数据分析师，不缴纳社保，以补贴代替。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "不缴纳社保", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-09", "text": "招聘运维工程师，需签自愿放弃社保承诺书。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "自愿放弃社保", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-10", "text": "招聘门店店员，入职需交押金。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "押金", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-11", "text": "招聘课程顾问，入职扣押身份证。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "扣押身份证", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-12", "text": "招聘测试工程师，实行大小周。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "大小周", "severity": "medium"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-13", "text": "招聘采购专员，每月休息2天。", "scope": "jd", "gold_findings": [{"category": "违法条款", "span": "每月休息2天", "severity": "medium"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-14", "text": "招聘后端工程师，包就业。", "scope": "jd", "gold_findings": [{"category": "虚假承诺", "span": "包就业", "severity": "medium"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-15", "text": "招聘前端工程师，百分百入职。", "scope": "jd", "gold_findings": [{"category": "虚假承诺", "span": "百分百入职", "severity": "medium"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-16", "text": "招聘产品经理，工资面议。", "scope": "jd", "gold_findings": [{"category": "表述不清", "span": "工资面议", "severity": "medium"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-17", "text": "招聘运营专员，限女性，要求SQL。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "限女性", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-18", "text": "招聘客服专员，女性优先，可接受应届生。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "女性优先", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-19", "text": "招聘销售代表，仅限男，需出差。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "仅限男", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-20", "text": "招聘会计，已婚已育优先。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "已婚已育", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-21", "text": "招聘人事专员，未婚优先，可接受外派。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "未婚优先", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-22", "text": "招聘行政助理，需提供生育计划。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "生育计划", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-23", "text": "招聘市场专员，35岁以下。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "35岁以下", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-24", "text": "招聘仓库管理员，年龄不超过45岁。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "年龄不超过", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-25", "text": "招聘配送员，28岁以下，能接受出差。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "28岁以下", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-26", "text": "招聘司机，要求本市户口。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "本市户口", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-27", "text": "招聘设计师，有户籍限制。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "户籍限制", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-28", "text": "招聘数据分析师，少数民族优先。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "民族", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-29", "text": "招聘运维工程师，需说明民族。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "民族", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-test-viol-30", "text": "招聘门店店员，要求无残疾。", "scope": "jd", "gold_findings": [{"category": "就业歧视", "span": "无残疾", "severity": "high"}], "clean": false, "boundary": false, "split": "test"}
+{"id": "gen-dev-clean-01", "text": "招聘后端工程师，负责服务端开发，要求本科及以上学历。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "gen-dev-clean-02", "text": "招聘前端工程师，熟悉Java，有良好的沟通能力。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "gen-dev-clean-03", "text": "招聘产品经理，负责客户维护，缴纳五险一金，提供带薪年假。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "gen-dev-clean-04", "text": "招聘运营专员，2年以上相关经验，薪资6000-9000元/月。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "gen-dev-clean-05", "text": "招聘客服专员，工作地点成都，双休，法定节假日正常休息。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "gen-dev-clean-06", "text": "招聘销售代表，负责仓库盘点，接受应届生。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "gen-dev-clean-07", "text": "招聘会计，熟悉沟通协调，有团队协作精神。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "gen-dev-clean-08", "text": "招聘人事专员，提供培训与晋升通道。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "gen-dev-clean-09", "text": "招聘行政助理，负责系统运维，能熟练使用 Office。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "gen-dev-clean-10", "text": "招聘市场专员，2年以上经验，熟悉SQL。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "dev"}
+{"id": "gen-test-clean-01", "text": "招聘运营专员，负责数据报表，要求本科及以上学历。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-02", "text": "招聘客服专员，熟悉Excel，有良好的沟通能力。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-03", "text": "招聘销售代表，负责仓库盘点，缴纳五险一金，提供带薪年假。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-04", "text": "招聘会计，2年以上相关经验，薪资15000-25000元/月。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-05", "text": "招聘人事专员，工作地点深圳，双休，法定节假日正常休息。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-06", "text": "招聘行政助理，负责系统运维，接受应届生。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-07", "text": "招聘市场专员，熟悉SQL，有团队协作精神。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-08", "text": "招聘仓库管理员，提供培训与晋升通道。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-09", "text": "招聘配送员，负责需求分析，能熟练使用 Office。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-10", "text": "招聘司机，2年以上经验，熟悉项目管理。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-11", "text": "招聘设计师，工作地点杭州，负责数据报表。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-12", "text": "招聘数据分析师，薪资15000-25000元/月，缴纳五险一金。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-13", "text": "招聘运维工程师，负责仓库盘点，要求本科及以上学历。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-14", "text": "招聘门店店员，熟悉SQL，有良好的沟通能力。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-15", "text": "招聘课程顾问，负责组件开发，缴纳五险一金，提供带薪年假。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-16", "text": "招聘测试工程师，2年以上相关经验，薪资15000-25000元/月。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-17", "text": "招聘采购专员，工作地点成都，双休，法定节假日正常休息。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-18", "text": "招聘后端工程师，负责服务端开发，接受应届生。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-19", "text": "招聘前端工程师，熟悉Python，有团队协作精神。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-test-clean-20", "text": "招聘产品经理，提供培训与晋升通道。", "scope": "jd", "gold_findings": [], "clean": true, "boundary": false, "split": "test"}
+{"id": "gen-dev-boundary-01", "text": "优先考虑有经验者。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "dev"}
+{"id": "gen-dev-boundary-02", "text": "能适应加班。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "dev"}
+{"id": "gen-dev-boundary-03", "text": "年龄不限。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "dev"}
+{"id": "gen-dev-boundary-04", "text": "不限性别、年龄、户籍。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "dev"}
+{"id": "gen-dev-boundary-05", "text": "能接受弹性工作安排。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "dev"}
+{"id": "gen-test-boundary-01", "text": "薪资 15-25K/月。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
+{"id": "gen-test-boundary-02", "text": "招聘会计，有相关经验者优先。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
+{"id": "gen-test-boundary-03", "text": "招聘人事专员，能适应偶尔加班。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
+{"id": "gen-test-boundary-04", "text": "招聘行政助理，年龄不限，欢迎应届生。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
+{"id": "gen-test-boundary-05", "text": "招聘市场专员，性别不限。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
+{"id": "gen-test-boundary-06", "text": "招聘仓库管理员，户籍不限。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
+{"id": "gen-test-boundary-07", "text": "招聘配送员，薪资 10-15K/月。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
+{"id": "gen-test-boundary-08", "text": "招聘司机，提供五险一金。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
+{"id": "gen-test-boundary-09", "text": "招聘设计师，工作时间 9:00-18:00。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
+{"id": "gen-test-boundary-10", "text": "招聘数据分析师，接受弹性工作制。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
+{"id": "gen-test-boundary-11", "text": "招聘运维工程师，有经验者优先考虑。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
+{"id": "gen-test-boundary-12", "text": "招聘门店店员，能承受一定工作压力。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
+{"id": "gen-test-boundary-13", "text": "招聘课程顾问，需偶尔出差。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
+{"id": "gen-test-boundary-14", "text": "招聘测试工程师，欢迎不同背景的候选人。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
+{"id": "gen-test-boundary-15", "text": "招聘采购专员，薪资根据经验面谈。", "scope": "jd", "gold_findings": [], "clean": false, "boundary": true, "split": "test"}
